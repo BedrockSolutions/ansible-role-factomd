@@ -1,0 +1,85 @@
+---
+
+- validate:
+    schema:
+      type: object
+      properties:
+        build:
+          type: string
+          enum:
+            - stable
+            - edge
+          default: stable
+        database_volume_device:
+          type: string
+        keys_volume_device:
+          type: string
+        swarm_manager_host:
+          type: string
+          format: hostname
+        swarm_token:
+          type: string
+        tls_cert_url:
+          type: string
+          format: uri
+          default: https://raw.githubusercontent.com/FactomProject/factomd-authority-toolkit/master/tls/cert.pem
+        tls_key_url:
+          type: string
+          format: uri
+          default: https://raw.githubusercontent.com/FactomProject/factomd-authority-toolkit/master/tls/key.pem
+        user:
+          type: string
+          default: ubuntu
+      required:
+        - build
+        - database_volume_device
+        - keys_volume_device
+        - swarm_manager_host
+        - swarm_token
+        - tls_cert_url
+        - tls_key_url
+    instance: "{{ factomd_docker }}"
+  register: factomd_docker_validated
+
+- set_fact:
+    factomd_docker_v: "{{ factomd_docker_validated.result }}"
+
+- import_role:
+    name: jcheroske.docker
+  vars:
+    docker:
+      command: download_tls_cert_and_key
+      cert_url: "{{ factomd_docker_v.tls_cert_url }}"
+      key_url: "{{ factomd_docker_v.tls_key_url }}"
+
+- import_role:
+    name: jcheroske.docker
+  vars:
+    docker:
+      command: install
+      build: "{{ factomd_docker_v.build }}"
+      user: "{{ factomd_docker_v.user }}"
+
+- include_role:
+    name: jcheroske.docker
+  vars:
+    docker:
+      command: local_volume_from_device
+      device: "{{ factomd_docker_v.database_volume_device }}"
+      name: factom_database
+
+- include_role:
+    name: jcheroske.docker
+  vars:
+    docker:
+      command: local_volume_from_device
+      device: "{{ factomd_docker_v.keys_volume_device }}"
+      name: factom_keys
+
+- import_role:
+    name: jcheroske.docker
+  vars:
+    docker:
+      command: swarm_node
+      manager_host: "{{ factomd_docker_v.swarm_manager_host }}"
+      token: "{{ factomd_docker_v.swarm_token }}"

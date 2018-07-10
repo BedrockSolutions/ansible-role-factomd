@@ -1,0 +1,18 @@
+---
+
+- validate:
+    schema:
+      type: object
+      properties:
+        command:
+          type: string
+          enum:
+            - config_firewall
+            - dependency
+            - install_docker
+      required:
+        - command
+    instance: "{{ factomd }}"
+
+- include_tasks: '{{ factomd.command }}.yml'
+  when: factomd.command != 'dependency'
