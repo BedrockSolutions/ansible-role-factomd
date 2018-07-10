@@ -94,6 +94,7 @@
 
     - name: "Restrict container ports to swarm manager"
       iptables:
+        action: insert
         chain: DOCKER-USER
         destination_port: "{{ item }}"
         in_interface: ! docker0
