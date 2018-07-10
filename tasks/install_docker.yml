@@ -38,34 +38,34 @@
         - swarm_token
         - tls_cert_url
         - tls_key_url
-    instance: "{{ factomd_docker }}"
-  register: factomd_docker_validated
+    instance: "{{ factomd }}"
+  register: factomd_validated
 
 - set_fact:
-    factomd_docker_v: "{{ factomd_docker_validated.result }}"
+    factomd_v: "{{ factomd_validated.result }}"
 
 - import_role:
     name: jcheroske.docker
   vars:
     docker:
       command: download_tls_cert_and_key
-      cert_url: "{{ factomd_docker_v.tls_cert_url }}"
-      key_url: "{{ factomd_docker_v.tls_key_url }}"
+      cert_url: "{{ factomd_v.tls_cert_url }}"
+      key_url: "{{ factomd_v.tls_key_url }}"
 
 - import_role:
     name: jcheroske.docker
   vars:
     docker:
       command: install
-      build: "{{ factomd_docker_v.build }}"
-      user: "{{ factomd_docker_v.user }}"
+      build: "{{ factomd_v.build }}"
+      user: "{{ factomd_v.user }}"
 
 - include_role:
     name: jcheroske.docker
   vars:
     docker:
       command: local_volume_from_device
-      device: "{{ factomd_docker_v.database_volume_device }}"
+      device: "{{ factomd_v.database_volume_device }}"
       name: factom_database
 
 - include_role:
@@ -73,7 +73,7 @@
   vars:
     docker:
       command: local_volume_from_device
-      device: "{{ factomd_docker_v.keys_volume_device }}"
+      device: "{{ factomd_v.keys_volume_device }}"
       name: factom_keys
 
 - import_role:
@@ -81,5 +81,5 @@
   vars:
     docker:
       command: swarm_node
-      manager_host: "{{ factomd_docker_v.swarm_manager_host }}"
-      token: "{{ factomd_docker_v.swarm_token }}"
+      manager_host: "{{ factomd_v.swarm_manager_host }}"
+      token: "{{ factomd_v.swarm_token }}"
