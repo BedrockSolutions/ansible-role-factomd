@@ -60,7 +60,7 @@
       build: "{{ factomd_v.build }}"
       user: "{{ factomd_v.user }}"
 
-- include_role:
+- import_role:
     name: jcheroske.docker
   vars:
     docker:
@@ -68,7 +68,7 @@
       device: "{{ factomd_v.database_volume_device }}"
       name: factom_database
 
-- include_role:
+- import_role:
     name: jcheroske.docker
   vars:
     docker:
@@ -83,3 +83,27 @@
       command: swarm_node
       manager_host: "{{ factomd_v.swarm_manager_host }}"
       token: "{{ factomd_v.swarm_token }}"
+
+- block:
+    - name: "Allow swarm manager to access docker daemon"
+      ufw:
+        rule: allow
+        from_ip: "{{ factomd_v.swarm_manager_host }}"
+        proto: tcp
+        to_port: 2376
+
+    - name: "Restrict container ports to swarm manager"
+      iptables:
+        chain: DOCKER_USER
+        destination_port: "{{ item }}"
+        in_interface: ! docker0
+        jump: DROP
+        match: tcp
+        out_interface: docker0
+        protocol: tcp
+        source: "! {{ factomd_v.swarm_manager_host }}"
+      loop:
+        - 2222
+        - 8088
+        - 8090
+  become: yes
