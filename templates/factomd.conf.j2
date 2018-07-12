@@ -1,9 +1,7 @@
 [app]
 {% if factomd_v.network == 'mainnet' %}
 MainSpecialPeers = "52.17.183.121:8108 52.17.153.126:8108 52.19.117.149:8108 52.18.72.212:8108"
-{% endif %}
-
-{% if factomd_v.network == 'testnet' %}
+{% elif factomd_v.network == 'testnet' %}
 CustomBootstrapIdentity               = 8888882f5002ff95fce15d20ecb7e18ae6cc4d5849b372985d856b56e492ae0f
 CustomBootstrapKey                    = 58cfccaa48a101742845df3cecde6a9f38037030842d34d0eaa76867904705ae
 CustomSeedURL         = "https://raw.githubusercontent.com/FactomProject/communitytestnet/master/seeds/testnetseeds.txt"
