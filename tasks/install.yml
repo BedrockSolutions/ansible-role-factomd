@@ -139,6 +139,7 @@
         - block:
             - name: "Install the factomd.conf template"
               template:
+                dest: /tmp/factom_keys/factomd.conf
                 force: no
                 src: factomd.conf.j2
           when: not factomd_config_check2.stat.exists
