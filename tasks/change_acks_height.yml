@@ -1,0 +1,25 @@
+---
+
+- validate:
+    schema:
+      type: object
+      properties:
+        block_height:
+          type: integer
+          minimum: 0
+      required:
+        - block_height
+    instance: "{{ factomd }}"
+  register: factomd_validated
+
+- set_fact:
+    factomd_v: "{{ factomd_validated.result }}"
+
+- name: "Set ChangeAcksHeight in config"
+  blockinfile:
+    block: |
+      ChangeAcksHeight = {{ factomd_v.block_height }}
+    marker: "; {mark} Ansible ChangeAcksHeight"
+    path: "/var/lib/docker/volumes/factom_keys/_data/factomd.conf"
+    state: present
+  become: yes

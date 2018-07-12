@@ -7,9 +7,11 @@
         command:
           type: string
           enum:
-            - config_firewall
+            - change_acks_height
+            - container
             - dependency
-            - install_docker
+            - identity
+            - install
       required:
         - command
     instance: "{{ factomd }}"

@@ -1,0 +1,46 @@
+---
+
+- validate:
+    schema:
+      type: object
+      properties:
+        identity_chain_id:
+          type: string
+        local_server_private_key:
+          type: string
+        local_server_public_key:
+          type: string
+        state:
+          type: string
+          enum:
+            - absent
+            - present
+      required:
+        - state
+    instance: "{{ factomd }}"
+  register: factomd_validated
+
+- set_fact:
+    factomd_v: "{{ factomd_validated.result }}"
+
+- block:
+    - name: "Add authority node identity to config"
+      blockinfile:
+        block: |
+          IdentityChainID = {{ factomd_identity_spec.identity_chain_id }}
+          LocalServerPrivKey = {{ factomd_identity_spec.local_server_private_key }}
+          LocalServerPublicKey = {{ factomd_identity_spec.local_server_public_key }}
+        marker: "; {mark} Ansible Server Identity"
+        path: "/var/lib/docker/volumes/factom_keys/_data/factomd.conf"
+        state: present
+      when: factomd_v.state == 'present'
+
+    - name: "Add follower identity to config"
+      blockinfile:
+        block: |
+          IdentityChainID = FA1E000000000000000000000000000000000000000000000000000000000000
+        marker: "; {mark} Ansible Server Identity"
+        path: "/var/lib/docker/volumes/factom_keys/_data/factomd.conf"
+        state: present
+      when: factomd_v.state == 'absent'
+  become: yes

@@ -14,6 +14,11 @@
           type: string
         keys_volume_device:
           type: string
+        network:
+          type: string
+          enum:
+            - mainnet
+            - testnet
         swarm_manager_host:
           type: string
           format: hostname
@@ -22,11 +27,9 @@
         tls_cert_url:
           type: string
           format: uri
-          default: https://raw.githubusercontent.com/FactomProject/factomd-authority-toolkit/master/tls/cert.pem
         tls_key_url:
           type: string
           format: uri
-          default: https://raw.githubusercontent.com/FactomProject/factomd-authority-toolkit/master/tls/key.pem
         user:
           type: string
           default: ubuntu
@@ -34,6 +37,7 @@
         - build
         - database_volume_device
         - keys_volume_device
+        - network
         - swarm_manager_host
         - swarm_token
         - tls_cert_url
@@ -92,6 +96,12 @@
         proto: tcp
         to_port: 2376
 
+    - name: "Allow world to access factomd p2p"
+      ufw:
+        rule: allow
+        proto: tcp
+        to_port: 8108
+
     - name: "Restrict container ports to swarm manager"
       iptables:
         action: insert
@@ -107,4 +117,37 @@
         - 2222
         - 8088
         - 8090
+
+    - name: "Check if facomtd.conf already exists using the docker volume directory"
+      stat:
+        path: /var/lib/docker/volumes/factom_keys/_data/factomd.conf
+      register: factomd_config_check1
+
+    - block:
+        - name: "Mount {{ factomd_v.keys_volume_device }} to /tmp/factom_keys"
+          mount:
+            path: /tmp/factom_keys
+            src: "{{ factomd_v.keys_volume_device }}"
+            fstype: ext4
+            state: mounted
+
+        - name: "Check if facomtd.conf already exists using /tmp/factom_keys"
+          stat:
+            path: /tmp/factom_keys/factomd.conf
+          register: factomd_config_check2
+
+        - block:
+            - name: "Install the factomd.conf template"
+              template:
+                force: no
+                src: factomd.conf.j2
+          when: not factomd_config_check2.stat.exists
+
+        - name: "Unmount {{ factomd_v.keys_volume_device }} from /tmp/factom_keys"
+          mount:
+            path: /tmp/factom_keys
+            src: "{{ factomd_v.keys_volume_device }}"
+            fstype: ext4
+            state: unmounted
+      when: not factomd_config_check1.stat.exists
   become: yes
