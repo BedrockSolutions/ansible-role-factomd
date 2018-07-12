@@ -24,7 +24,7 @@
 - set_fact:
     factomd_v: "{{ factomd_validated.result }}"
 
-- name: "Manage the factomd container: {{ factomd_container_state }}"
+- name: "Manage the factomd container: {{ factomd_v.state }}"
   docker_container:
     command: -startdelay=600 -faulttimeout=120 -config=/root/.factom/private/factomd.conf
     image: "{{ factomd_v.image }}"
