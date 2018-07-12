@@ -12,6 +12,7 @@
             - dependency
             - identity
             - install
+            - update_image
       required:
         - command
     instance: "{{ factomd }}"

@@ -1,0 +1,22 @@
+---
+
+- validate:
+    schema:
+      type: object
+      properties:
+        image:
+          type: string
+      required:
+        - image
+    instance: "{{ factomd }}"
+  register: factomd_validated
+
+- set_fact:
+    factomd_v: "{{ factomd_validated.result }}"
+
+
+- name: "Pull the factomd image {{ factomd_v.image }}"
+  docker_image:
+    force: yes
+    name: "{{ factomd_v.image }}"
+    state: present
