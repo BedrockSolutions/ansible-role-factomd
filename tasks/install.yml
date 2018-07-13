@@ -12,6 +12,9 @@
           default: stable
         database_volume_device:
           type: string
+        external_network_interface:
+          type: string
+          default: ens4
         keys_volume_device:
           type: string
         network:
@@ -136,10 +139,9 @@
         action: insert
         chain: DOCKER-USER
         destination_port: "{{ item }}"
-        in_interface: !docker0
+        in_interface: "{{ factomd_v.external_network_interface }}"
         jump: DROP
         match: tcp
-        out_interface: docker0
         protocol: tcp
         source: "! {{ factomd_v.swarm_manager_host }}"
       loop:
@@ -151,10 +153,9 @@
         action: insert
         chain: DOCKER-USER
         destination_port: "{{ item }}"
-        in_interface: !docker_gwbridge
+        in_interface: "{{ factomd_v.external_network_interface }}"
         jump: DROP
         match: tcp
-        out_interface: docker_gwbridge
         protocol: tcp
         source: "! {{ factomd_v.swarm_manager_host }}"
       loop:
