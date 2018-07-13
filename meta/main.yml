@@ -16,3 +16,11 @@ dependencies:
       docker:
         command: dependency
     version: master
+
+  - name: jcheroske.ufw
+    scm: git
+    src: git@github.com:jcheroske/ansible-role-ufw.git
+    vars:
+      ufw:
+        command: dependency
+    version: master
