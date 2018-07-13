@@ -115,7 +115,7 @@
             leaderheight ${record["result"]["leaderheight"]}
           </record>
         </filter>
-      name: factomd_heights
+      filename: factomd_heights
 
 - block:
     - name: "Allow swarm manager to access docker daemon"
