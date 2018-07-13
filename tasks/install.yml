@@ -128,12 +128,6 @@
         proto: tcp
         to_port: 2376
 
-    - name: "Allow world to access factomd p2p"
-      ufw:
-        rule: allow
-        proto: tcp
-        to_port: 8108
-
     - name: "Restrict factomd console and api to swarm manager"
       iptables:
         action: insert
@@ -147,18 +141,6 @@
       loop:
         - 8088
         - 8090
-
-    - name: "Restrict portainer ssh to swarm manager"
-      iptables:
-        action: insert
-        chain: DOCKER-USER
-        destination_port: "{{ item }}"
-        in_interface: "{{ factomd_v.external_network_interface }}"
-        jump: DROP
-        match: tcp
-        protocol: tcp
-        source: "! {{ factomd_v.swarm_manager_host }}"
-      loop:
         - 2222
 
     - name: "Check if facomtd.conf already exists using the docker volume directory"
