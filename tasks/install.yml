@@ -127,8 +127,9 @@
         from_ip: "{{ factomd_v.swarm_manager_host }}"
         proto: tcp
         to_port: 2376
+      notify: ufw_rules_changed
 
-    - name: "Restrict factomd console and api to swarm manager"
+    - name: "Restrict factomd console, api, and portainer ssh to swarm manager"
       iptables:
         action: insert
         chain: DOCKER-USER
@@ -138,6 +139,7 @@
         match: tcp
         protocol: tcp
         source: "! {{ factomd_v.swarm_manager_host }}"
+      notify: ufw_rules_changed
       loop:
         - 8088
         - 8090
