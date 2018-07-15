@@ -27,9 +27,9 @@
     - name: "Add authority node identity to config"
       blockinfile:
         block: |
-          IdentityChainID = {{ factomd_identity_spec.identity_chain_id }}
-          LocalServerPrivKey = {{ factomd_identity_spec.local_server_private_key }}
-          LocalServerPublicKey = {{ factomd_identity_spec.local_server_public_key }}
+          IdentityChainID = {{ factomd.identity_chain_id }}
+          LocalServerPrivKey = {{ factomd.local_server_private_key }}
+          LocalServerPublicKey = {{ factomd.local_server_public_key }}
         marker: "; {mark} Ansible Server Identity"
         path: "/var/lib/docker/volumes/factom_keys/_data/factomd.conf"
         state: present
