@@ -73,6 +73,7 @@
     docker:
       command: local_volume_from_device
       device: "{{ factomd_v.database_volume_device }}"
+      mount_point: /mnt/docker_volumes/factom_database
       name: factom_database
 
 - import_role:
@@ -81,6 +82,7 @@
     docker:
       command: local_volume_from_device
       device: "{{ factomd_v.keys_volume_device }}"
+      mount_point: /mnt/docker_voumes/factom_keys
       name: factom_keys
 
 - import_role:
