@@ -20,6 +20,6 @@
     block: |
       ChangeAcksHeight = {{ factomd_v.block_height }}
     marker: "; {mark} Ansible ChangeAcksHeight"
-    path: "/var/lib/docker/volumes/factom_keys/_data/factomd.conf"
+    path: "/mnt/docker_volumes/factom_keys/factomd.conf"
     state: present
   become: yes

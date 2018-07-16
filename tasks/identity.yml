@@ -31,7 +31,7 @@
           LocalServerPrivKey = {{ factomd.local_server_private_key }}
           LocalServerPublicKey = {{ factomd.local_server_public_key }}
         marker: "; {mark} Ansible Server Identity"
-        path: "/var/lib/docker/volumes/factom_keys/_data/factomd.conf"
+        path: "/mnt/docker_volumes/factom_keys/factomd.conf"
         state: present
       when: factomd_v.state == 'present'
 
@@ -40,7 +40,7 @@
         block: |
           IdentityChainID = FA1E000000000000000000000000000000000000000000000000000000000000
         marker: "; {mark} Ansible Server Identity"
-        path: "/var/lib/docker/volumes/factom_keys/_data/factomd.conf"
+        path: "/mnt/docker_volumes/factom_keys/factomd.conf"
         state: present
       when: factomd_v.state == 'absent'
   become: yes
