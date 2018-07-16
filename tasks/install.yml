@@ -147,37 +147,16 @@
         - 8090
         - 2222
 
-    - name: "Check if facomtd.conf already exists using the docker volume directory"
+    - name: "Check if facomtd.conf already exists"
       stat:
-        path: /var/lib/docker/volumes/factom_keys/_data/factomd.conf
-      register: factomd_config_check1
+        path: /mnt/docker_volumes/factom_keys/factomd.conf
+      register: factomd_config_check
 
     - block:
-        - name: "Mount {{ factomd_v.keys_volume_device }} to /tmp/factom_keys"
-          mount:
-            path: /tmp/factom_keys
-            src: "{{ factomd_v.keys_volume_device }}"
-            fstype: ext4
-            state: mounted
-
-        - name: "Check if facomtd.conf already exists using /tmp/factom_keys"
-          stat:
-            path: /tmp/factom_keys/factomd.conf
-          register: factomd_config_check2
-
-        - block:
-            - name: "Install the factomd.conf template"
-              template:
-                dest: /tmp/factom_keys/factomd.conf
-                force: no
-                src: factomd.conf.j2
-          when: not factomd_config_check2.stat.exists
-
-        - name: "Unmount {{ factomd_v.keys_volume_device }} from /tmp/factom_keys"
-          mount:
-            path: /tmp/factom_keys
-            src: "{{ factomd_v.keys_volume_device }}"
-            fstype: ext4
-            state: unmounted
-      when: not factomd_config_check1.stat.exists
+        - name: "Install the factomd.conf template"
+          template:
+            dest: /mnt/docker_volumes/factom_keys/factomd.conf
+            force: no
+            src: factomd.conf.j2
+      when: not factomd_config_check.stat.exists
   become: yes
