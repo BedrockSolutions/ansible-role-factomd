@@ -1,179 +1,182 @@
 ---
 
-- validate:
-    schema:
-      type: object
-      properties:
-        build:
-          type: string
-          enum:
-            - stable
-            - edge
-          default: stable
-        database_volume_device:
-          type: string
-        external_network_interface:
-          type: string
-          default: ens4
-        keys_volume_device:
-          type: string
-        network:
-          type: string
-          enum:
-            - mainnet
-            - testnet
-        swarm_manager_host:
-          type: string
-          format: hostname
-        swarm_token:
-          type: string
-        tls_cert_url:
-          type: string
-          format: uri
-        tls_key_url:
-          type: string
-          format: uri
-        user:
-          type: string
-          default: ubuntu
-      required:
-        - build
-        - database_volume_device
-        - keys_volume_device
-        - network
-        - swarm_manager_host
-        - swarm_token
-        - tls_cert_url
-        - tls_key_url
-    instance: "{{ factomd }}"
-  register: factomd_validated
-
-- set_fact:
-    factomd_v: "{{ factomd_validated.result }}"
-
-- import_role:
-    name: jcheroske.docker
-  vars:
-    docker:
-      command: download_tls_cert_and_key
-      cert_url: "{{ factomd_v.tls_cert_url }}"
-      key_url: "{{ factomd_v.tls_key_url }}"
-
-- import_role:
-    name: jcheroske.docker
-  vars:
-    docker:
-      command: install
-      build: "{{ factomd_v.build }}"
-      user: "{{ factomd_v.user }}"
-
-- import_role:
-    name: jcheroske.docker
-  vars:
-    docker:
-      command: local_volume_from_device
-      device: "{{ factomd_v.database_volume_device }}"
-      mount_point: /mnt/docker_volumes/factom_database
-      name: factom_database
-
-- import_role:
-    name: jcheroske.docker
-  vars:
-    docker:
-      command: local_volume_from_device
-      device: "{{ factomd_v.keys_volume_device }}"
-      mount_point: /mnt/docker_volumes/factom_keys
-      name: factom_keys
-
-- import_role:
-    name: jcheroske.docker
-  vars:
-    docker:
-      command: swarm_node
-      manager_host: "{{ factomd_v.swarm_manager_host }}"
-      token: "{{ factomd_v.swarm_token }}"
-
-- import_role:
-    name: jcheroske.stackdriver
-  vars:
-    stackdriver:
-      command: configure_logging_agent
-      config: |
-        <source>
-          @type exec
-          <parse>
-            @type json
-          </parse>
-          tag factomd_heights
-          command curl -X POST --data-binary '{"jsonrpc": "2.0", "id": 0, "method": "heights"}' -H 'content-type:text/plain;' http://localhost:8088/v2
-          run_interval 1m
-        </source>
-
-        <filter factomd_heights>
-          @type record_transformer
-          enable_ruby
-          renew_record
-          <record>
-            directoryblockheight ${record["result"]["directoryblockheight"]}
-            entryblockheight ${record["result"]["entryblockheight"]}
-            entryheight ${record["result"]["entryheight"]}
-            leaderheight ${record["result"]["leaderheight"]}
-          </record>
-        </filter>
-      filename: factomd_heights
-
-- import_role:
-    name: jcheroske.stackdriver
-  vars:
-    stackdriver:
-      command: configure_logging_agent
-      config: |
-        <filter factomd_docker>
-          @type record_transformer
-          enable_ruby
-          renew_record
-          <record>
-            source ${record["source"]}
-            log ${record["log"]}
-          </record>
-        </filter>
-      filename: factomd_docker
-
 - block:
-    - name: "Allow swarm manager to access docker daemon"
-      ufw:
-        rule: allow
-        from_ip: "{{ factomd_v.swarm_manager_host }}"
-        proto: tcp
-        to_port: 2376
-      notify: ufw_rules_changed
+    - validate:
+        schema:
+          type: object
+          properties:
+            build:
+              type: string
+              enum:
+                - stable
+                - edge
+              default: stable
+            database_volume_device:
+              type: string
+            external_network_interface:
+              type: string
+              default: ens4
+            keys_volume_device:
+              type: string
+            network:
+              type: string
+              enum:
+                - mainnet
+                - testnet
+            swarm_manager_host:
+              type: string
+              format: hostname
+            swarm_token:
+              type: string
+            tls_cert_url:
+              type: string
+              format: uri
+            tls_key_url:
+              type: string
+              format: uri
+            user:
+              type: string
+              default: ubuntu
+          required:
+            - build
+            - database_volume_device
+            - keys_volume_device
+            - network
+            - swarm_manager_host
+            - swarm_token
+            - tls_cert_url
+            - tls_key_url
+        instance: "{{ factomd }}"
+      register: factomd_validated
 
-    - name: "Restrict factomd console, api, and portainer ssh to swarm manager"
-      iptables:
-        action: insert
-        chain: DOCKER-USER
-        destination_port: "{{ item }}"
-        in_interface: "{{ factomd_v.external_network_interface }}"
-        jump: DROP
-        match: tcp
-        protocol: tcp
-        source: "! {{ factomd_v.swarm_manager_host }}"
-      notify: ufw_rules_changed
-      loop:
-        - 8088
-        - 8090
-        - 2222
+    - set_fact:
+        factomd_v: "{{ factomd_validated.result }}"
 
-    - name: "Check if facomtd.conf already exists"
-      stat:
-        path: /mnt/docker_volumes/factom_keys/factomd.conf
-      register: factomd_config_check
+    - import_role:
+        name: jcheroske.docker
+      vars:
+        docker:
+          command: download_tls_cert_and_key
+          cert_url: "{{ factomd_v.tls_cert_url }}"
+          key_url: "{{ factomd_v.tls_key_url }}"
+
+    - import_role:
+        name: jcheroske.docker
+      vars:
+        docker:
+          command: install
+          build: "{{ factomd_v.build }}"
+          user: "{{ factomd_v.user }}"
+
+    - import_role:
+        name: jcheroske.docker
+      vars:
+        docker:
+          command: local_volume_from_device
+          device: "{{ factomd_v.database_volume_device }}"
+          mount_point: /mnt/docker_volumes/factom_database
+          name: factom_database
+
+    - import_role:
+        name: jcheroske.docker
+      vars:
+        docker:
+          command: local_volume_from_device
+          device: "{{ factomd_v.keys_volume_device }}"
+          mount_point: /mnt/docker_volumes/factom_keys
+          name: factom_keys
+
+    - import_role:
+        name: jcheroske.docker
+      vars:
+        docker:
+          command: swarm_node
+          manager_host: "{{ factomd_v.swarm_manager_host }}"
+          token: "{{ factomd_v.swarm_token }}"
+
+    - import_role:
+        name: jcheroske.stackdriver
+      vars:
+        stackdriver:
+          command: configure_logging_agent
+          config: |
+            <source>
+              @type exec
+              <parse>
+                @type json
+              </parse>
+              tag factomd_heights
+              command curl -X POST --data-binary '{"jsonrpc": "2.0", "id": 0, "method": "heights"}' -H 'content-type:text/plain;' http://localhost:8088/v2
+              run_interval 1m
+            </source>
+
+            <filter factomd_heights>
+              @type record_transformer
+              enable_ruby
+              renew_record
+              <record>
+                directoryblockheight ${record["result"]["directoryblockheight"]}
+                entryblockheight ${record["result"]["entryblockheight"]}
+                entryheight ${record["result"]["entryheight"]}
+                leaderheight ${record["result"]["leaderheight"]}
+              </record>
+            </filter>
+          filename: factomd_heights
+
+    - import_role:
+        name: jcheroske.stackdriver
+      vars:
+        stackdriver:
+          command: configure_logging_agent
+          config: |
+            <filter factomd_docker>
+              @type record_transformer
+              enable_ruby
+              renew_record
+              <record>
+                source ${record["source"]}
+                log ${record["log"]}
+              </record>
+            </filter>
+          filename: factomd_docker
 
     - block:
-        - name: "Install the factomd.conf template"
-          template:
-            dest: /mnt/docker_volumes/factom_keys/factomd.conf
-            force: no
-            src: factomd.conf.j2
-      when: not factomd_config_check.stat.exists
-  become: yes
+        - name: "Allow swarm manager to access docker daemon"
+          ufw:
+            rule: allow
+            from_ip: "{{ factomd_v.swarm_manager_host }}"
+            proto: tcp
+            to_port: 2376
+          notify: ufw_rules_changed
+
+        - name: "Restrict factomd console, api, and portainer ssh to swarm manager"
+          iptables:
+            action: insert
+            chain: DOCKER-USER
+            destination_port: "{{ item }}"
+            in_interface: "{{ factomd_v.external_network_interface }}"
+            jump: DROP
+            match: tcp
+            protocol: tcp
+            source: "! {{ factomd_v.swarm_manager_host }}"
+          notify: ufw_rules_changed
+          loop:
+            - 8088
+            - 8090
+            - 2222
+
+        - name: "Check if facomtd.conf already exists"
+          stat:
+            path: /mnt/docker_volumes/factom_keys/factomd.conf
+          register: factomd_config_check
+
+        - block:
+            - name: "Install the factomd.conf template"
+              template:
+                dest: /mnt/docker_volumes/factom_keys/factomd.conf
+                force: no
+                src: factomd.conf.j2
+          when: not factomd_config_check.stat.exists
+      become: yes
+  tags:
+    - factomd_install

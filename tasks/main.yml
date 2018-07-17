@@ -1,21 +1,24 @@
 ---
 
-- validate:
-    schema:
-      type: object
-      properties:
-        command:
-          type: string
-          enum:
-            - change_acks_height
-            - container
-            - dependency
-            - identity
-            - install
-            - update_image
-      required:
-        - command
-    instance: "{{ factomd }}"
+- block:
+    - validate:
+        schema:
+          type: object
+          properties:
+            command:
+              type: string
+              enum:
+                - change_acks_height
+                - container
+                - dependency
+                - identity
+                - install
+                - update_image
+          required:
+            - command
+        instance: "{{ factomd }}"
 
-- include_tasks: '{{ factomd.command }}.yml'
-  when: factomd.command != 'dependency'
+    - include_tasks: '{{ factomd.command }}.yml'
+      when: factomd.command != 'dependency'
+  tags:
+    - factomd
