@@ -122,6 +122,20 @@
         </filter>
       filename: factomd_heights
 
+- import_role:
+    name: jcheroske.stackdriver
+  vars:
+    stackdriver:
+      command: configure_logging_agent
+      config: |
+        <source>
+          @type forward
+          port 24224
+          bind 0.0.0.0
+          tag factomd_log
+        </source>
+      filename: factomd_log
+
 - block:
     - name: "Allow swarm manager to access docker daemon"
       ufw:
