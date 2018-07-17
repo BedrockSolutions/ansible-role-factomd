@@ -30,6 +30,7 @@
     image: "{{ factomd_v.image }}"
     labels:
       name: factomd
+    log_driver: fluentd
     name: factomd
     ports:
       - 8088:8088
