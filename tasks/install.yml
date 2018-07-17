@@ -93,7 +93,7 @@
       manager_host: "{{ factomd_v.swarm_manager_host }}"
       token: "{{ factomd_v.swarm_token }}"
 
-  import_role:
+- import_role:
     name: jcheroske.stackdriver
   vars:
     stackdriver:
@@ -118,6 +118,23 @@
             entryblockheight ${record["result"]["entryblockheight"]}
             entryheight ${record["result"]["entryheight"]}
             leaderheight ${record["result"]["leaderheight"]}
+          </record>
+        </filter>
+      filename: factomd_heights
+
+- import_role:
+    name: jcheroske.stackdriver
+  vars:
+    stackdriver:
+      command: configure_logging_agent
+      config: |
+        <filter factomd_docker>
+          @type record_transformer
+          enable_ruby
+          renew_record
+          <record>
+            source ${record["source"]}
+            log ${record["log"]}
           </record>
         </filter>
       filename: factomd_heights
