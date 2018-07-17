@@ -31,9 +31,9 @@
         image: "{{ factomd_v.image }}"
         labels:
           name: factomd
-        log_driver: gcplogs
-#        log_options:
-#          tag: factomd_docker
+        log_driver: fluentd
+        log_options:
+          tag: factomd_docker
         name: factomd
         ports:
           - 8088:8088
