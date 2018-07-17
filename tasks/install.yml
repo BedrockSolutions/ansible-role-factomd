@@ -137,7 +137,7 @@
             log ${record["log"]}
           </record>
         </filter>
-      filename: factomd_heights
+      filename: factomd_docker
 
 - block:
     - name: "Allow swarm manager to access docker daemon"
