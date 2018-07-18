@@ -9,6 +9,7 @@
               oneOf:
                 - type: "null"
                 - type: string
+              default: none
             state:
               type: string
               enum:
@@ -17,7 +18,6 @@
                 - started
                 - stopped
           required:
-            - image
             - state
         instance: "{{ factomd }}"
       register: factomd_validated
