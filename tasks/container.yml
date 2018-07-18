@@ -9,7 +9,7 @@
               oneOf:
                 - type: "null"
                 - type: string
-              default: none
+              default: null
             state:
               type: string
               enum:
