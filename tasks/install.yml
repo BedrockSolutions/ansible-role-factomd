@@ -130,13 +130,8 @@
           command: configure_logging_agent
           config: |
             <filter factomd_docker>
-              @type record_transformer
-              enable_ruby
-              renew_record
-              <record>
-                source ${record["source"]}
-                log ${record["log"]}
-              </record>
+              @type record_modifier
+              whitelist_keys log
             </filter>
           filename: factomd_docker
 
