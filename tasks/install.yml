@@ -23,7 +23,7 @@
               enum:
                 - mainnet
                 - testnet
-            stackdriver_log_ingestion:
+            stackdriver_ingest_log:
               type: boolean
               default: no
             swarm_manager_host:
@@ -45,7 +45,7 @@
             - database_volume_device
             - keys_volume_device
             - network
-            - stackdriver_log_ingestion
+            - stackdriver_ingest_log
             - swarm_manager_host
             - swarm_token
             - tls_cert_url
@@ -143,7 +143,7 @@
                   </record>
                 </filter>
               filename: factomd_docker
-      when: factomd_v.stackdriver_log_ingestion
+      when: factomd_v.stackdriver_ingest_log
 
     - block:
         - name: "Allow swarm manager to access docker daemon"
