@@ -120,10 +120,10 @@
                   enable_ruby
                   renew_record
                   <record>
-                    directoryblockheight ${record["result"]["directoryblockheight"]}
-                    entryblockheight ${record["result"]["entryblockheight"]}
-                    entryheight ${record["result"]["entryheight"]}
-                    leaderheight ${record["result"]["leaderheight"]}
+                    directoryBlockHeight ${record["result"]["directoryblockheight"]}
+                    entryBlockHeight ${record["result"]["entryblockheight"]}
+                    entryHeight ${record["result"]["entryheight"]}
+                    leaderHeight ${record["result"]["leaderheight"]}
                   </record>
                 </filter>
               filename: factomd_heights
