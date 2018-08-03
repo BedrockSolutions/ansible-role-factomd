@@ -1,9 +1,9 @@
 ---
 
 - name: "Delete all FastBoot files from the factom_database volume"
-  file:
-    name: "{{ item }}"
-    state: absent
-  with_fileglob:
-    - "/mnt/docker_volumes/factom_database/FastBoot*"
+  shell: rm /mnt/docker_volumes/factom_database/FastBoot*
+  register: factomd_rm_return
   become: yes
+
+- debug:
+    var: factomd_rm_return
