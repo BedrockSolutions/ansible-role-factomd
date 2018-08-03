@@ -3,5 +3,6 @@
 - name: "Delete all FastBoot files from the factom_database volume"
   file:
     name: "{{ item }}"
-  with_fileglob: /mnt/docker_volumes/factom_database/FastBoot*
+  with_fileglob:
+    - "/mnt/docker_volumes/factom_database/FastBoot*"
   become: yes
