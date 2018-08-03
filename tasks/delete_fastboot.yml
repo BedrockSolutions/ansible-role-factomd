@@ -5,6 +5,8 @@
   args:
     warn: no
   register: factomd_rm_return
+  changed_when:
+    - factomd_rm_return is not failed
   failed_when:
     - factomd_rm_return is failed
     - "'No such file or directory' not in factomd_rm_return.stderr"
