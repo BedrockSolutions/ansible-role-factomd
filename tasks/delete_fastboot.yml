@@ -1,7 +1,8 @@
 ---
 
 - name: "Delete all FastBoot files from the factom_database volume"
-  shell: rm /mnt/docker_volumes/factom_database/FastBoot*
+  shell: rm -v /mnt/docker_volumes/factom_database/FastBoot*
+    warn: no
   register: factomd_rm_return
   become: yes
 
