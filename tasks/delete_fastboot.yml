@@ -7,5 +7,5 @@
   register: factomd_rm_return
   failed_when:
     - factomd_rm_return is failed
-    - "'No such file or directory' not in factomd_rm_return.stderr
+    - "'No such file or directory' not in factomd_rm_return.stderr"
   become: yes
