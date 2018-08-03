@@ -1,0 +1,11 @@
+---
+
+- block:
+    - name: "Create a snapshot of the factom_database volume"
+      command: >
+        gcloud compute disks snapshot
+        {{ inventory_hostname }}-factom-database
+        --snapshot-names {{ inventory_hostname }}-factom-database-{{ ansible_date_time.epoch }}
+        --zone {{ zone }}
+  tags:
+    - factomd_backup_database
