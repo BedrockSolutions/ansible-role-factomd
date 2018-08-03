@@ -4,3 +4,4 @@
   file:
     name: "{{ item }}"
   with_fileglob: /mnt/docker_volumes/factom_database/FastBoot*
+  become: yes
