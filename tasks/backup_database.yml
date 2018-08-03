@@ -7,5 +7,6 @@
         {{ inventory_hostname }}-factom-database
         --snapshot-names {{ inventory_hostname }}-factom-database-{{ ansible_date_time.epoch }}
         --zone {{ zone }}
+      delegate_to: localhost
   tags:
     - factomd_backup_database
