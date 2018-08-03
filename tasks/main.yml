@@ -11,6 +11,7 @@
                 - backup_database
                 - change_acks_height
                 - container
+                - delete_fastboot
                 - dependency
                 - identity
                 - install
