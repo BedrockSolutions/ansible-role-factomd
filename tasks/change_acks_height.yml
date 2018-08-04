@@ -9,6 +9,7 @@
               type: string
               minLength: 6
               maxLength: 7
+              pattern: ^[1-9][0-9]+$
           required:
             - block_height
         instance: "{{ factomd }}"
