@@ -6,8 +6,9 @@
           type: object
           properties:
             block_height:
-              type: integer
-              minimum: 0
+              type: string
+              minLength: 6
+              maxLength: 7
           required:
             - block_height
         instance: "{{ factomd }}"
