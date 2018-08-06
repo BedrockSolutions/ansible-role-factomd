@@ -137,11 +137,12 @@
               config: |
                 <filter factomd_docker>
                   @type record_transformer
+                  enable_ruby
                   renew_record true
                   keep_keys container_name, source
                   <record>
                     hostname ${hostname}
-                    message ${hostname record["log"]}
+                    message ${hostname << " " << record["log"]}
                   </record>
                 </filter>
               filename: factomd_docker
