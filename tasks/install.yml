@@ -120,6 +120,7 @@
                   enable_ruby
                   renew_record
                   <record>
+                    hostname ${hostname}
                     directoryBlockHeight ${record["result"]["directoryblockheight"]}
                     entryBlockHeight ${record["result"]["entryblockheight"]}
                     entryHeight ${record["result"]["entryheight"]}
@@ -139,7 +140,8 @@
                   renew_record true
                   keep_keys container_name, source
                   <record>
-                    message ${record["log"]}
+                    hostname ${hostname}
+                    message ${hostname record["log"]}
                   </record>
                 </filter>
               filename: factomd_docker
