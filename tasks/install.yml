@@ -142,7 +142,7 @@
                   keep_keys container_name, source
                   <record>
                     hostname ${hostname}
-                    message ${hostname << " " << record["log"]}
+                    message ${hostname + " " + record["log"]}
                   </record>
                 </filter>
               filename: factomd_docker
