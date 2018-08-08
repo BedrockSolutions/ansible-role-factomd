@@ -23,9 +23,6 @@
               enum:
                 - mainnet
                 - testnet
-            stackdriver_ingest_log:
-              type: boolean
-              default: no
             swarm_manager_host:
               type: string
               format: hostname
@@ -45,7 +42,6 @@
             - database_volume_device
             - keys_volume_device
             - network
-            - stackdriver_ingest_log
             - swarm_manager_host
             - swarm_token
             - tls_cert_url
@@ -97,56 +93,6 @@
           command: swarm_node
           manager_host: "{{ factomd_v.swarm_manager_host }}"
           token: "{{ factomd_v.swarm_token }}"
-
-    - block:
-        - import_role:
-            name: jcheroske.stackdriver
-          vars:
-            stackdriver:
-              command: configure_logging_agent
-              config: |
-                <source>
-                  @type exec
-                  <parse>
-                    @type json
-                  </parse>
-                  tag factomd_heights
-                  command curl -X POST --data-binary '{"jsonrpc": "2.0", "id": 0, "method": "heights"}' -H 'content-type:text/plain;' http://localhost:8088/v2
-                  run_interval 1m
-                </source>
-
-                <filter factomd_heights>
-                  @type record_transformer
-                  enable_ruby
-                  renew_record
-                  <record>
-                    hostname ${hostname}
-                    directoryBlockHeight ${record["result"]["directoryblockheight"]}
-                    entryBlockHeight ${record["result"]["entryblockheight"]}
-                    entryHeight ${record["result"]["entryheight"]}
-                    leaderHeight ${record["result"]["leaderheight"]}
-                  </record>
-                </filter>
-              filename: factomd_heights
-
-        - import_role:
-            name: jcheroske.stackdriver
-          vars:
-            stackdriver:
-              command: configure_logging_agent
-              config: |
-                <filter factomd_docker>
-                  @type record_transformer
-                  enable_ruby
-                  renew_record true
-                  keep_keys container_name, source
-                  <record>
-                    hostname ${hostname}
-                    message ${hostname + " " + record["log"]}
-                  </record>
-                </filter>
-              filename: factomd_docker
-      when: factomd_v.stackdriver_ingest_log
 
     - block:
         - name: "Allow swarm manager to access docker daemon"

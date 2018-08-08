@@ -1,0 +1,82 @@
+---
+
+- block:
+    - import_role:
+        name: jcheroske.stackdriver
+      vars:
+        stackdriver:
+          command: configure_logging_agent
+          config: |
+            <source>
+              @type exec
+              <parse>
+                @type json
+              </parse>
+              tag factomd_heights
+              command curl -X POST --data-binary '{"jsonrpc": "2.0", "id": 0, "method": "heights"}' -H 'content-type:text/plain;' http://localhost:8088/v2
+              run_interval 1m
+            </source>
+
+            <filter factomd_heights>
+              @type record_transformer
+              enable_ruby
+              renew_record
+              <record>
+                hostname ${hostname}
+                directoryBlockHeight ${record["result"]["directoryblockheight"]}
+                entryBlockHeight ${record["result"]["entryblockheight"]}
+                entryHeight ${record["result"]["entryheight"]}
+                leaderHeight ${record["result"]["leaderheight"]}
+              </record>
+            </filter>
+          filename: factomd_heights
+
+    - import_role:
+        name: jcheroske.stackdriver
+      vars:
+        stackdriver:
+          command: configure_logging_agent
+          config: |
+            <filter factomd_docker>
+              @type record_transformer
+              enable_ruby
+              renew_record true
+              keep_keys container_name, source
+              <record>
+                hostname ${hostname}
+                message ${hostname + " " + record["log"]}
+              </record>
+            </filter>
+          filename: factomd_docker
+
+    - import_role:
+        name: jcheroske.stackdriver
+      vars:
+        stackdriver:
+          command: configure_monitoring_agent
+          config: |
+            <Plugin curl_json>
+              <URL "http://localhost:8088/v2">
+                Instance "factomd"
+                Interval 60
+                Post '{"jsonrpc": "2.0", "id": 0, "method": "heights"}'
+                <Key "result/directoryblockheight">
+                  Type "directory_block_height"
+                </Key>
+
+                <Key "result/entryblockheight">
+                  Type "entry_block_height"
+                </Key>
+
+                <Key "result/entryheight">
+                  Type "entry_height"
+                </Key>
+
+                <Key "result/leaderheight">
+                  Type "leader_height"
+                </Key>
+              </URL>
+            </Plugin>
+  become: yes
+  tags:
+    - factomd_configure_stackdriver
