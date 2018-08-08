@@ -77,6 +77,7 @@
                 </Key>
               </URL>
             </Plugin>
+          filename: factomd_block_heights
   become: yes
   tags:
     - factomd_configure_stackdriver
