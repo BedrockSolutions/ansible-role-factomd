@@ -54,30 +54,32 @@
       vars:
         stackdriver:
           command: configure_monitoring_agent
-          config: |
+          data_source_specification: record
+          metric_descriptor_name: factomd/block_heights
+          metric_type: GAUGE
+          plugin_config: |
+            LoadPlugin curl_json
             <Plugin curl_json>
               <URL "http://localhost:8088/v2">
-                Instance "factomd"
+                Header "content-type:text/plain;"
+                Instance "factomd_block_heights"
                 Interval 60
-                Post '{"jsonrpc": "2.0", "id": 0, "method": "heights"}'
+                Post "{\"jsonrpc\": \"2.0\", \"id\": 0, \"method\": \"heights\"}"
+
                 <Key "result/directoryblockheight">
-                  Type "directory_block_height"
+                  Type "record"
                 </Key>
-
                 <Key "result/entryblockheight">
-                  Type "entry_block_height"
+                  Type "record"
                 </Key>
-
                 <Key "result/entryheight">
-                  Type "entry_height"
+                  Type "record"
                 </Key>
-
                 <Key "result/leaderheight">
-                  Type "leader_height"
+                  Type "record"
                 </Key>
               </URL>
             </Plugin>
-          filename: factomd_block_heights
-  become: yes
+          plugin_instance: factomd_block_heights
   tags:
     - factomd_configure_stackdriver
