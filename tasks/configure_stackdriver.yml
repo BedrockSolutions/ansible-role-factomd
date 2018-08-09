@@ -67,7 +67,7 @@
                 Post "{\"jsonrpc\": \"2.0\", \"id\": 0, \"method\": \"heights\"}"
 
                 <Key "result/directoryblockheight">
-                  Type "records"
+                  Type "gauge"
                 </Key>
               </URL>
             </Plugin>
@@ -91,7 +91,7 @@
                 Post "{\"jsonrpc\": \"2.0\", \"id\": 0, \"method\": \"heights\"}"
 
                 <Key "result/entryblockheight">
-                  Type "records"
+                  Type "gauge"
                 </Key>
               </URL>
             </Plugin>
@@ -115,7 +115,7 @@
                 Post "{\"jsonrpc\": \"2.0\", \"id\": 0, \"method\": \"heights\"}"
 
                 <Key "result/entryheight">
-                  Type "records"
+                  Type "gauge"
                 </Key>
               </URL>
             </Plugin>
@@ -139,7 +139,7 @@
                 Post "{\"jsonrpc\": \"2.0\", \"id\": 0, \"method\": \"heights\"}"
 
                 <Key "result/leaderheight">
-                  Type "records"
+                  Type "gauge"
                 </Key>
               </URL>
             </Plugin>
