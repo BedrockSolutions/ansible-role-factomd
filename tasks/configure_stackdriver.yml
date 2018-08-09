@@ -67,16 +67,16 @@
                 Post "{\"jsonrpc\": \"2.0\", \"id\": 0, \"method\": \"heights\"}"
 
                 <Key "result/directoryblockheight">
-                  Type "record"
+                  Type "records"
                 </Key>
                 <Key "result/entryblockheight">
-                  Type "record"
+                  Type "records"
                 </Key>
                 <Key "result/entryheight">
-                  Type "record"
+                  Type "records"
                 </Key>
                 <Key "result/leaderheight">
-                  Type "record"
+                  Type "records"
                 </Key>
               </URL>
             </Plugin>
