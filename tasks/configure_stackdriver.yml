@@ -55,31 +55,94 @@
         stackdriver:
           command: configure_monitoring_agent
           data_source_specification: record
-          metric_descriptor_name: factomd/block_heights
+          metric_descriptor_name: factomd/directory_block_height
           metric_type: GAUGE
           plugin_config: |
             LoadPlugin curl_json
             <Plugin curl_json>
               <URL "http://localhost:8088/v2">
                 Header "content-type:text/plain;"
-                Instance "factomd_block_heights"
+                Instance "factomd_directory_block_height"
                 Interval 60
                 Post "{\"jsonrpc\": \"2.0\", \"id\": 0, \"method\": \"heights\"}"
 
                 <Key "result/directoryblockheight">
                   Type "records"
                 </Key>
+              </URL>
+            </Plugin>
+          plugin_instance: factomd_directory_block_height
+
+    - import_role:
+        name: jcheroske.stackdriver
+      vars:
+        stackdriver:
+          command: configure_monitoring_agent
+          data_source_specification: record
+          metric_descriptor_name: factomd/entry_block_height
+          metric_type: GAUGE
+          plugin_config: |
+            LoadPlugin curl_json
+            <Plugin curl_json>
+              <URL "http://localhost:8088/v2">
+                Header "content-type:text/plain;"
+                Instance "factomd_entry_block_height"
+                Interval 60
+                Post "{\"jsonrpc\": \"2.0\", \"id\": 0, \"method\": \"heights\"}"
+
                 <Key "result/entryblockheight">
                   Type "records"
                 </Key>
+              </URL>
+            </Plugin>
+          plugin_instance: factomd_entry_block_height
+
+    - import_role:
+        name: jcheroske.stackdriver
+      vars:
+        stackdriver:
+          command: configure_monitoring_agent
+          data_source_specification: record
+          metric_descriptor_name: factomd/entry_height
+          metric_type: GAUGE
+          plugin_config: |
+            LoadPlugin curl_json
+            <Plugin curl_json>
+              <URL "http://localhost:8088/v2">
+                Header "content-type:text/plain;"
+                Instance "factomd_entry_height"
+                Interval 60
+                Post "{\"jsonrpc\": \"2.0\", \"id\": 0, \"method\": \"heights\"}"
+
                 <Key "result/entryheight">
                   Type "records"
                 </Key>
+              </URL>
+            </Plugin>
+          plugin_instance: factomd_entry_height
+
+    - import_role:
+        name: jcheroske.stackdriver
+      vars:
+        stackdriver:
+          command: configure_monitoring_agent
+          data_source_specification: record
+          metric_descriptor_name: factomd/leader_height
+          metric_type: GAUGE
+          plugin_config: |
+            LoadPlugin curl_json
+            <Plugin curl_json>
+              <URL "http://localhost:8088/v2">
+                Header "content-type:text/plain;"
+                Instance "factomd_leader_height"
+                Interval 60
+                Post "{\"jsonrpc\": \"2.0\", \"id\": 0, \"method\": \"heights\"}"
+
                 <Key "result/leaderheight">
                   Type "records"
                 </Key>
               </URL>
             </Plugin>
-          plugin_instance: factomd_block_heights
+          plugin_instance: factomd_leader_height
   tags:
     - factomd_configure_stackdriver
