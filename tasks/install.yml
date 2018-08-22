@@ -90,7 +90,7 @@
         name: jcheroske.docker
       vars:
         docker:
-          command: swarm_node
+          command: swarm_worker_node
           manager_host: "{{ factomd_v.swarm_manager_host }}"
           token: "{{ factomd_v.swarm_token }}"
 
