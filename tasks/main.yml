@@ -1,4 +1,4 @@
 ---
 
 - include_tasks: ./factomd.yml
-  when: (factomd is not defined) or (command not in factomd) or (factomd.command != 'dependency')
+  when: (factomd is not defined) or ('command' not in factomd) or (factomd.command != 'dependency')
