@@ -1,26 +1,26 @@
 ---
 
 dependencies:
-  - name: jcheroske.common
+  - name: bedrock.common
     scm: git
-    src: git@github.com:jcheroske/ansible-role-common.git
+    src: https://github.com/BedrockSolutions/ansible-role-common.git
     vars:
       common:
         command: dependency
     version: master
 
-  - name: jcheroske.docker
+  - name: bedrock.docker
     scm: git
-    src: git@github.com:jcheroske/ansible-role-docker.git
+    src: https://github.com/BedrockSolutions/ansible-role-docker.git
     vars:
       docker:
         command: dependency
     version: master
 
-  - name: jcheroske.ufw
+  - name: bedrock.os
     scm: git
-    src: git@github.com:jcheroske/ansible-role-ufw.git
+    src: https://github.com/BedrockSolutions/ansible-role-os.git
     vars:
-      ufw:
+      os:
         command: dependency
     version: master

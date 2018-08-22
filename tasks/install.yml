@@ -53,7 +53,7 @@
         factomd_v: "{{ factomd_validated.result }}"
 
     - import_role:
-        name: jcheroske.docker
+        name: bedrock.docker
       vars:
         docker:
           command: download_tls_cert_and_key
@@ -61,7 +61,7 @@
           key_url: "{{ factomd_v.tls_key_url }}"
 
     - import_role:
-        name: jcheroske.docker
+        name: bedrock.docker
       vars:
         docker:
           command: install
@@ -69,7 +69,7 @@
           user: "{{ factomd_v.user }}"
 
     - import_role:
-        name: jcheroske.docker
+        name: bedrock.docker
       vars:
         docker:
           command: local_volume_from_device
@@ -78,7 +78,7 @@
           name: factom_database
 
     - import_role:
-        name: jcheroske.docker
+        name: bedrock.docker
       vars:
         docker:
           command: local_volume_from_device
@@ -87,7 +87,7 @@
           name: factom_keys
 
     - import_role:
-        name: jcheroske.docker
+        name: bedrock.docker
       vars:
         docker:
           command: swarm_worker_node
@@ -101,7 +101,7 @@
             from_ip: "{{ factomd_v.swarm_manager_host }}"
             proto: tcp
             to_port: 2376
-          notify: ufw_rules_changed
+          notify: os_ufw_rules_changed
 
         - name: "Restrict factomd console, api, and portainer ssh to swarm manager"
           iptables:
@@ -113,7 +113,7 @@
             match: tcp
             protocol: tcp
             source: "! {{ factomd_v.swarm_manager_host }}"
-          notify: ufw_rules_changed
+          notify: os_ufw_rules_changed
           loop:
             - 8088
             - 8090
