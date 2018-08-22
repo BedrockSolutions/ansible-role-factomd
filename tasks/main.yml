@@ -1,27 +1,4 @@
 ---
 
-- block:
-    - validate:
-        schema:
-          type: object
-          properties:
-            command:
-              type: string
-              enum:
-                - backup_database
-                - change_acks_height
-                - configure_stackdriver
-                - container
-                - delete_fastboot
-                - dependency
-                - identity
-                - install
-                - update_image
-          required:
-            - command
-        instance: "{{ factomd }}"
-
-    - include_tasks: '{{ factomd.command }}.yml'
-      when: factomd.command != 'dependency'
-  tags:
-    - factomd
+- include_tasks: ./factomd.yml
+  when (factomd not exists) or (command not in factomd) or (factomd.command != 'dependency')
