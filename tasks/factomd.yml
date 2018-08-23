@@ -10,7 +10,6 @@
               enum:
                 - backup_database
                 - change_acks_height
-                - configure_stackdriver
                 - container
                 - delete_fastboot
                 - dependency

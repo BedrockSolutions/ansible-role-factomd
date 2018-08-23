@@ -5,17 +5,15 @@
         schema:
           type: object
           properties:
-            build:
-              type: string
-              enum:
-                - stable
-                - edge
-              default: stable
             database_volume_device:
               type: string
+            docker_build:
+              oneOf:
+                - type: "null"
+                - type: string
+              default: null
             external_network_interface:
               type: string
-              default: ens4
             keys_volume_device:
               type: string
             network:
@@ -23,6 +21,9 @@
               enum:
                 - mainnet
                 - testnet
+            stackdriver_enable:
+              type: boolean
+              default: no
             swarm_manager_host:
               type: string
               format: hostname
@@ -34,14 +35,16 @@
             tls_key_url:
               type: string
               format: uri
-            user:
-              type: string
-              default: ubuntu
+            docker_user:
+              oneOf:
+                - type: "null"
+                - type: string
+              default: null
           required:
-            - build
             - database_volume_device
             - keys_volume_device
             - network
+            - stackdriver_enable
             - swarm_manager_host
             - swarm_token
             - tls_cert_url
@@ -65,7 +68,7 @@
       vars:
         docker:
           command: install
-          build: "{{ factomd_v.build }}"
+          build: "{{ factomd_v.docker_build }}"
           user: "{{ factomd_v.user }}"
 
     - import_role:
@@ -132,5 +135,151 @@
                 src: factomd.conf.j2
           when: not factomd_config_check.stat.exists
       become: yes
+
+    - block:
+        - import_role:
+            name: bedrock.stackdriver
+          vars:
+            stackdriver:
+              command: configure_logging_agent
+              config: |
+                <source>
+                  @type exec
+                  <parse>
+                    @type json
+                  </parse>
+                  tag factomd_heights
+                  command curl -X POST --data-binary '{"jsonrpc": "2.0", "id": 0, "method": "heights"}' -H 'content-type:text/plain;' http://localhost:8088/v2
+                  run_interval 1m
+                </source>
+
+                <filter factomd_heights>
+                  @type record_transformer
+                  enable_ruby
+                  renew_record
+                  <record>
+                    hostname ${hostname}
+                    directoryBlockHeight ${record["result"]["directoryblockheight"]}
+                    entryBlockHeight ${record["result"]["entryblockheight"]}
+                    entryHeight ${record["result"]["entryheight"]}
+                    leaderHeight ${record["result"]["leaderheight"]}
+                  </record>
+                </filter>
+              filename: factomd_heights
+
+        - import_role:
+            name: bedrock.stackdriver
+          vars:
+            stackdriver:
+              command: configure_logging_agent
+              config: |
+                <filter factomd_docker>
+                  @type record_transformer
+                  enable_ruby
+                  renew_record true
+                  keep_keys container_name, source
+                  <record>
+                    hostname ${hostname}
+                    message ${hostname + " " + record["log"]}
+                  </record>
+                </filter>
+              filename: factomd_docker
+
+        - import_role:
+            name: bedrock.stackdriver
+          vars:
+            stackdriver:
+              command: configure_monitoring_agent
+              data_source_specification: record
+              metric_descriptor_name: factomd/directory_block_height
+              metric_type: GAUGE
+              plugin_config: |
+                LoadPlugin curl_json
+                <Plugin curl_json>
+                  <URL "http://localhost:8088/v2">
+                    Header "content-type:text/plain;"
+                    Instance "factomd_directory_block_height"
+                    Interval 60
+                    Post "{\"jsonrpc\": \"2.0\", \"id\": 0, \"method\": \"heights\"}"
+
+                    <Key "result/directoryblockheight">
+                      Type "gauge"
+                    </Key>
+                  </URL>
+                </Plugin>
+              plugin_instance: factomd_directory_block_height
+
+        - import_role:
+            name: bedrock.stackdriver
+          vars:
+            stackdriver:
+              command: configure_monitoring_agent
+              data_source_specification: record
+              metric_descriptor_name: factomd/entry_block_height
+              metric_type: GAUGE
+              plugin_config: |
+                LoadPlugin curl_json
+                <Plugin curl_json>
+                  <URL "http://localhost:8088/v2">
+                    Header "content-type:text/plain;"
+                    Instance "factomd_entry_block_height"
+                    Interval 60
+                    Post "{\"jsonrpc\": \"2.0\", \"id\": 0, \"method\": \"heights\"}"
+
+                    <Key "result/entryblockheight">
+                      Type "gauge"
+                    </Key>
+                  </URL>
+                </Plugin>
+              plugin_instance: factomd_entry_block_height
+
+        - import_role:
+            name: bedrock.stackdriver
+          vars:
+            stackdriver:
+              command: configure_monitoring_agent
+              data_source_specification: record
+              metric_descriptor_name: factomd/entry_height
+              metric_type: GAUGE
+              plugin_config: |
+                LoadPlugin curl_json
+                <Plugin curl_json>
+                  <URL "http://localhost:8088/v2">
+                    Header "content-type:text/plain;"
+                    Instance "factomd_entry_height"
+                    Interval 60
+                    Post "{\"jsonrpc\": \"2.0\", \"id\": 0, \"method\": \"heights\"}"
+
+                    <Key "result/entryheight">
+                      Type "gauge"
+                    </Key>
+                  </URL>
+                </Plugin>
+              plugin_instance: factomd_entry_height
+
+        - import_role:
+            name: bedrock.stackdriver
+          vars:
+            stackdriver:
+              command: configure_monitoring_agent
+              data_source_specification: record
+              metric_descriptor_name: factomd/leader_height
+              metric_type: GAUGE
+              plugin_config: |
+                LoadPlugin curl_json
+                <Plugin curl_json>
+                  <URL "http://localhost:8088/v2">
+                    Header "content-type:text/plain;"
+                    Instance "factomd_leader_height"
+                    Interval 60
+                    Post "{\"jsonrpc\": \"2.0\", \"id\": 0, \"method\": \"heights\"}"
+
+                    <Key "result/leaderheight">
+                      Type "gauge"
+                    </Key>
+                  </URL>
+                </Plugin>
+              plugin_instance: factomd_leader_height
+      when: stackdriver_enable
   tags:
     - factomd_install

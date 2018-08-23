@@ -10,6 +10,9 @@
                 - type: "null"
                 - type: string
               default: null
+            stackdriver_enable:
+              type: boolean
+              default: no
             state:
               type: string
               enum:
@@ -18,6 +21,7 @@
                 - started
                 - stopped
           required:
+            - stackdriver_enable
             - state
         instance: "{{ factomd }}"
       register: factomd_validated
@@ -31,7 +35,7 @@
         image: "{{ factomd_v.image }}"
         labels:
           name: factomd
-        log_driver: fluentd
+        log_driver: "{{ stackdriver_enable | ternary('fluentd', None) }}"
         log_options:
           tag: factomd_docker
         name: factomd
