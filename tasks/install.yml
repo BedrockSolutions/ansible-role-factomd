@@ -8,15 +8,9 @@
             database_volume_device:
               type: string
             docker_build:
-              oneOf:
-                - type: "null"
-                - type: string
-              default: null
+              type: string
             docker_user:
-              oneOf:
-                - type: "null"
-                - type: string
-              default: null
+              type: string
             external_network_interface:
               type: string
             keys_volume_device:
@@ -68,8 +62,8 @@
       vars:
         docker:
           command: install
-          build: "{{ factomd_v.docker_build }}"
-          user: "{{ factomd_v.docker_user }}"
+          build: "{{ factomd_v.docker_build | default(None) }}"
+          user: "{{ factomd_v.docker_user | default(None) }}"
 
     - import_role:
         name: bedrock.docker
