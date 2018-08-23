@@ -24,3 +24,11 @@ dependencies:
       os:
         command: dependency
     version: master
+
+  - name: bedrock.stackdriver
+    scm: git
+    src: https://github.com/BedrockSolutions/ansible-role-stackdriver.git
+    vars:
+      stackdriver:
+        command: dependency
+    version: master
