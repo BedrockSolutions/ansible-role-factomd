@@ -276,6 +276,6 @@
                   </URL>
                 </Plugin>
               plugin_instance: factomd_leader_height
-      when: stackdriver_enable
+      when: factomd_v.stackdriver_enable
   tags:
     - factomd_install
