@@ -22,7 +22,7 @@
               enum:
                 - mainnet
                 - testnet
-            stackdriver_enable:
+            stackdriver_ingest_logs_and_metrics:
               type: boolean
               default: no
             swarm_manager_host:
@@ -40,7 +40,7 @@
             - database_volume_device
             - keys_volume_device
             - network
-            - stackdriver_enable
+            - stackdriver_ingest_logs_and_metrics
             - swarm_manager_host
             - swarm_token
             - tls_cert_url
@@ -276,6 +276,6 @@
                   </URL>
                 </Plugin>
               plugin_instance: factomd_leader_height
-      when: factomd_v.stackdriver_enable
+      when: factomd_v.stackdriver_ingest_logs_and_metrics
   tags:
     - factomd_install
