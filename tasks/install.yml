@@ -9,8 +9,10 @@
               type: string
             docker_build:
               type: string
+              default: stable
             docker_user:
               type: string
+              default: ubuntu
             external_network_interface:
               type: string
             keys_volume_device:
@@ -62,8 +64,8 @@
       vars:
         docker:
           command: install
-          build: "{{ factomd_v.docker_build | default(None) }}"
-          user: "{{ factomd_v.docker_user | default(None) }}"
+          build: "{{ factomd_v.docker_build }}"
+          user: "{{ factomd_v.docker_user }}"
 
     - import_role:
         name: bedrock.docker
