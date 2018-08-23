@@ -6,10 +6,7 @@
           type: object
           properties:
             image:
-              oneOf:
-                - type: "null"
-                - type: string
-              default: null
+              type: string
             stackdriver_enable:
               type: boolean
               default: no
@@ -32,10 +29,10 @@
     - name: "Manage the factomd container: {{ factomd_v.state }}"
       docker_container:
         command: -startdelay=600 -faulttimeout=120 -config=/root/.factom/private/factomd.conf
-        image: "{{ factomd_v.image }}"
+        image: "{{ factomd_v.image | default(None) }}"
         labels:
           name: factomd
-        log_driver: "{{ stackdriver_enable | ternary('fluentd', None) }}"
+        log_driver: "{{ factomd_v.stackdriver_enable | ternary('fluentd', None) }}"
         log_options:
           tag: factomd_docker
         name: factomd
