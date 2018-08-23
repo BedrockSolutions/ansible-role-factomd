@@ -12,6 +12,11 @@
                 - type: "null"
                 - type: string
               default: null
+            docker_user:
+              oneOf:
+                - type: "null"
+                - type: string
+              default: null
             external_network_interface:
               type: string
             keys_volume_device:
@@ -35,11 +40,6 @@
             tls_key_url:
               type: string
               format: uri
-            docker_user:
-              oneOf:
-                - type: "null"
-                - type: string
-              default: null
           required:
             - database_volume_device
             - keys_volume_device
@@ -69,7 +69,7 @@
         docker:
           command: install
           build: "{{ factomd_v.docker_build }}"
-          user: "{{ factomd_v.user }}"
+          user: "{{ factomd_v.docker_user }}"
 
     - import_role:
         name: bedrock.docker
