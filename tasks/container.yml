@@ -8,6 +8,12 @@
             - properties:
                 image:
                   type: string
+                network:
+                  type: string
+                  enum:
+                    - mainnet
+                    - testnet
+                  default: mainnet
                 stackdriver_enabled:
                   type: boolean
                   default: no
@@ -17,6 +23,7 @@
                     - present
               required:
                 - image
+                - network
                 - stackdriver_enabled
                 - state
             - properties:
@@ -47,7 +54,7 @@
         ports:
           - 8088:8088
           - 8090:8090
-          - 8108:8108
+          - "{{ (factomd_v.network == 'mainnet') | ternary('8108:8108', '8110:8110') }}"
         restart_policy: no
         volumes:
           - factom_database:/root/.factom/m2
