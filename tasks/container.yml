@@ -41,25 +41,31 @@
     - set_fact:
         factomd_v: "{{ factomd_validated.result }}"
 
-    - name: "Create the factomd container"
-      docker_container:
-        command: -startdelay=600 -faulttimeout=120 -config=/root/.factom/private/factomd.conf
-        image: "{{ factomd_v.image | default(None) }}"
-        labels:
-          name: factomd
-        log_driver: "{{ factomd_v.stackdriver_enabled | ternary('fluentd', None) }}"
-        log_options:
-          tag: factomd_docker
-        name: factomd
-        ports:
-          - 8088:8088
-          - 8090:8090
-          - "{{ (factomd_v.network == 'mainnet') | ternary('8108:8108', '8110:8110') }}"
-        restart_policy: no
-        volumes:
-          - factom_database:/root/.factom/m2
-          - factom_keys:/root/.factom/private
-        state: present
+    - block:
+        - name: "Ensure fluentd is running"
+          wait_for:
+            port: 24224
+          when: factomd_v.stackdriver_enabled
+
+        - name: "Create the factomd container"
+          docker_container:
+            command: -startdelay=600 -faulttimeout=120 -config=/root/.factom/private/factomd.conf
+            image: "{{ factomd_v.image | default(None) }}"
+            labels:
+              name: factomd
+            log_driver: "{{ factomd_v.stackdriver_enabled | ternary('fluentd', None) }}"
+            log_options:
+              tag: factomd_docker
+            name: factomd
+            ports:
+              - 8088:8088
+              - 8090:8090
+              - "{{ (factomd_v.network == 'mainnet') | ternary('8108:8108', '8110:8110') }}"
+            restart_policy: no
+            volumes:
+              - factom_database:/root/.factom/m2
+              - factom_keys:/root/.factom/private
+            state: present
       when: factomd_v.state == 'present'
 
     - name: "Manage the factomd container: {{ factomd_v.state }}"
