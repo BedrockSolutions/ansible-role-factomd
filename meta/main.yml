@@ -9,6 +9,22 @@ dependencies:
         command: dependency
     version: master
 
+  - name: bedrock.docker
+    scm: git
+    src: https://github.com/BedrockSolutions/ansible-role-docker.git
+    vars:
+      docker:
+        command: dependency
+    version: master
+
+  - name: bedrock.os
+    scm: git
+    src: https://github.com/BedrockSolutions/ansible-role-os.git
+    vars:
+      os:
+        command: dependency
+    version: master
+
   - name: bedrock.stackdriver
     scm: git
     src: https://github.com/BedrockSolutions/ansible-role-stackdriver.git

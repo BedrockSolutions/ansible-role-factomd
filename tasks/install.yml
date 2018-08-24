@@ -5,7 +5,11 @@
         schema:
           type: object
           properties:
+            database_volume_device:
+              type: string
             external_network_interface:
+              type: string
+            keys_volume_device:
               type: string
             network:
               type: string
@@ -15,25 +19,68 @@
             stackdriver_enabled:
               type: boolean
               default: no
-            swarm_manager_host:
-              type: string
-              format: hostname
           required:
+            - database_volume_device
             - external_network_interface
+            - keys_volume_device
             - network
             - stackdriver_enabled
-            - swarm_manager_host
         instance: "{{ factomd }}"
       register: factomd_validated
 
     - set_fact:
         factomd_v: "{{ factomd_validated.result }}"
 
+    - set_fact:
+        factomd_docker_config: "{{ factomd_docker_config_map[ factomd_v.network ] }}"
+        
+    - import_role:
+        name: bedrock.docker
+      vars:
+        docker:
+          command: download_tls_cert_and_key
+          cert_url: "{{ factomd_docker_config.tls_cert_url }}"
+          key_url: "{{ factomd_docker_config.tls_key_url }}"
+
+    - import_role:
+        name: bedrock.docker
+      vars:
+        docker:
+          command: install
+          build: "{{ factomd_v.docker_build }}"
+          user: "{{ factomd_v.docker_user }}"
+
+    - import_role:
+        name: bedrock.docker
+      vars:
+        docker:
+          command: local_volume_from_device
+          device: "{{ factomd_v.database_volume_device }}"
+          mount_point: /mnt/docker_volumes/factom_database
+          name: factom_database
+
+    - import_role:
+        name: bedrock.docker
+      vars:
+        docker:
+          command: local_volume_from_device
+          device: "{{ factomd_v.keys_volume_device }}"
+          mount_point: /mnt/docker_volumes/factom_keys
+          name: factom_keys
+
+    - import_role:
+        name: bedrock.docker
+      vars:
+        docker:
+          command: swarm_worker_node
+          manager_host: "{{ factomd_docker_config.swarm_manager_host }}"
+          token: "{{ factomd_docker_config.swarm_token }}"
+
     - block:
         - name: "Allow swarm manager to access docker daemon"
           ufw:
             rule: allow
-            from_ip: "{{ factomd_v.swarm_manager_host }}"
+            from_ip: "{{ factomd_docker_config.swarm_manager_host }}"
             proto: tcp
             to_port: 2376
           notify: os_ufw_rules_changed
@@ -47,7 +94,7 @@
             jump: DROP
             match: tcp
             protocol: tcp
-            source: "! {{ factomd_v.swarm_manager_host }}"
+            source: "! {{ factomd_docker_config.swarm_manager_host }}"
           notify: os_ufw_rules_changed
           loop:
             - 8088
