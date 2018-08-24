@@ -5,93 +5,29 @@
         schema:
           type: object
           properties:
-            database_volume_device:
-              type: string
-            docker_build:
-              type: string
-              default: stable
-            docker_user:
-              type: string
-              default: ubuntu
             external_network_interface:
-              type: string
-            keys_volume_device:
               type: string
             network:
               type: string
               enum:
                 - mainnet
                 - testnet
-            stackdriver_ingest_logs_and_metrics:
+            stackdriver_enabled:
               type: boolean
               default: no
             swarm_manager_host:
               type: string
               format: hostname
-            swarm_token:
-              type: string
-            tls_cert_url:
-              type: string
-              format: uri
-            tls_key_url:
-              type: string
-              format: uri
           required:
-            - database_volume_device
-            - keys_volume_device
+            - external_network_interface
             - network
-            - stackdriver_ingest_logs_and_metrics
+            - stackdriver_enabled
             - swarm_manager_host
-            - swarm_token
-            - tls_cert_url
-            - tls_key_url
         instance: "{{ factomd }}"
       register: factomd_validated
 
     - set_fact:
         factomd_v: "{{ factomd_validated.result }}"
-
-    - import_role:
-        name: bedrock.docker
-      vars:
-        docker:
-          command: download_tls_cert_and_key
-          cert_url: "{{ factomd_v.tls_cert_url }}"
-          key_url: "{{ factomd_v.tls_key_url }}"
-
-    - import_role:
-        name: bedrock.docker
-      vars:
-        docker:
-          command: install
-          build: "{{ factomd_v.docker_build }}"
-          user: "{{ factomd_v.docker_user }}"
-
-    - import_role:
-        name: bedrock.docker
-      vars:
-        docker:
-          command: local_volume_from_device
-          device: "{{ factomd_v.database_volume_device }}"
-          mount_point: /mnt/docker_volumes/factom_database
-          name: factom_database
-
-    - import_role:
-        name: bedrock.docker
-      vars:
-        docker:
-          command: local_volume_from_device
-          device: "{{ factomd_v.keys_volume_device }}"
-          mount_point: /mnt/docker_volumes/factom_keys
-          name: factom_keys
-
-    - import_role:
-        name: bedrock.docker
-      vars:
-        docker:
-          command: swarm_worker_node
-          manager_host: "{{ factomd_v.swarm_manager_host }}"
-          token: "{{ factomd_v.swarm_token }}"
 
     - block:
         - name: "Allow swarm manager to access docker daemon"
@@ -118,18 +54,11 @@
             - 8090
             - 2222
 
-        - name: "Check if facomtd.conf already exists"
-          stat:
-            path: /mnt/docker_volumes/factom_keys/factomd.conf
-          register: factomd_config_check
-
-        - block:
-            - name: "Install the factomd.conf template"
-              template:
-                dest: /mnt/docker_volumes/factom_keys/factomd.conf
-                force: no
-                src: factomd.conf.j2
-          when: not factomd_config_check.stat.exists
+        - name: "Install the factomd.conf template"
+          template:
+            dest: /mnt/docker_volumes/factom_keys/factomd.conf
+            force: no
+            src: factomd.conf.j2
       become: yes
 
     - block:
@@ -276,6 +205,6 @@
                   </URL>
                 </Plugin>
               plugin_instance: factomd_leader_height
-      when: factomd_v.stackdriver_ingest_logs_and_metrics
+      when: factomd_v.stackdriver_enabled
   tags:
     - factomd_install

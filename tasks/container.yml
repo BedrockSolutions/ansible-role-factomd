@@ -4,35 +4,43 @@
     - validate:
         schema:
           type: object
-          properties:
-            image:
-              type: string
-            stackdriver_ingest_log:
-              type: boolean
-              default: no
-            state:
-              type: string
-              enum:
-                - absent
-                - present
-                - started
-                - stopped
-          required:
-            - stackdriver_ingest_log
-            - state
+          oneOf:
+            - properties:
+                image:
+                  type: string
+                stackdriver_enabled:
+                  type: boolean
+                  default: no
+                state:
+                  type: string
+                  enum:
+                    - present
+              required:
+                - image
+                - stackdriver_enabled
+                - state
+            - properties:
+                state:
+                  type: string
+                  enum:
+                    - absent
+                    - started
+                    - stopped
+              required:
+                - state
         instance: "{{ factomd }}"
       register: factomd_validated
 
     - set_fact:
         factomd_v: "{{ factomd_validated.result }}"
 
-    - name: "Manage the factomd container: {{ factomd_v.state }}"
+    - name: "Create the factomd container"
       docker_container:
         command: -startdelay=600 -faulttimeout=120 -config=/root/.factom/private/factomd.conf
         image: "{{ factomd_v.image | default(None) }}"
         labels:
           name: factomd
-        log_driver: "{{ factomd_v.stackdriver_ingest_log | ternary('fluentd', None) }}"
+        log_driver: "{{ factomd_v.stackdriver_enabled | ternary('fluentd', None) }}"
         log_options:
           tag: factomd_docker
         name: factomd
@@ -44,6 +52,13 @@
         volumes:
           - factom_database:/root/.factom/m2
           - factom_keys:/root/.factom/private
+        state: present
+      when: factomd_v.state == 'present'
+
+    - name: "Manage the factomd container: {{ factomd_v.state }}"
+      docker_container:
+        name: factomd
         state: "{{ factomd_v.state }}"
+      when: factomd_v.state != 'present'
   tags:
     - factomd_container
