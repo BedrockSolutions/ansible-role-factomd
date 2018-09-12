@@ -43,7 +43,6 @@
 
     - name: "Create the factomd container"
       docker_container:
-        command: -startdelay=600 -faulttimeout=120 -config=/root/.factom/private/factomd.conf
         image: "{{ factomd_v.image | default(None) }}"
         labels:
           name: factomd
@@ -64,6 +63,7 @@
 
     - name: "Manage the factomd container: {{ factomd_v.state }}"
       docker_container:
+        command: -startdelay=600 -faulttimeout=120 -config=/root/.factom/private/factomd.conf
         name: factomd
         state: "{{ factomd_v.state }}"
       when: factomd_v.state != 'present'
