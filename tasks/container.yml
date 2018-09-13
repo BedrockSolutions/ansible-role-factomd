@@ -43,6 +43,7 @@
 
     - name: "Create the factomd container"
       docker_container:
+        command: -startdelay=600 -faulttimeout=120 -config=/root/.factom/private/factomd.conf
         image: "{{ factomd_v.image | default(None) }}"
         labels:
           name: factomd
