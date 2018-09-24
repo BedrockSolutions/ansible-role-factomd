@@ -99,20 +99,18 @@
             to_port: 2376
           notify: os_ufw_rules_changed
 
-        - name: "Drop all console, api, and portainer ssh traffic"
+        - name: "Flush the DOCKER-USER chain"
           iptables:
-            action: insert
             chain: DOCKER-USER
-            destination_port: "{{ item }}"
-            in_interface: "{{ factomd_v.external_network_interface }}"
-            jump: DROP
-            match: tcp
-            protocol: tcp
+            flush: yes
           notify: os_ufw_rules_changed
-          loop:
-            - 8090
-            - 8088
-            - 2222
+
+        - name: "Drop all non-matching packets on DOCKER-USER"
+          iptables:
+            chain: DOCKER-USER
+            action: append
+            jump: DROP
+          notify: os_ufw_rules_changed
 
         - name: "Allow factomd console, api, and portainer ssh to swarm manager"
           iptables:
@@ -120,7 +118,7 @@
             chain: DOCKER-USER
             destination_port: "{{ item }}"
             in_interface: "{{ factomd_v.external_network_interface }}"
-            jump: ACCEPT
+            jump: RETURN
             match: tcp
             protocol: tcp
             source: "{{ factomd_docker_config.swarm_manager_host }}"
@@ -130,18 +128,29 @@
             - 8088
             - 2222
 
-        - name: "Allow api traffic to allowed networks"
+        - name: "Allow API traffic to allowed networks"
           iptables:
             action: insert
             chain: DOCKER-USER
             destination_port: 8088
             in_interface: "{{ factomd_v.external_network_interface }}"
-            jump: ACCEPT
+            jump: RETURN
             match: tcp
             protocol: tcp
             source: "{{ item }}"
           notify: os_ufw_rules_changed
           loop: "{{ factomd_v.api_allowed_networks }}"
+
+        - name: "Allow established and related traffic on DOCKER-USER"
+          iptables:
+            action: insert
+            chain: DOCKER-USER
+            ctstate:
+              - ESTABLISHED
+              - RELATED
+            in_interface: "{{ factomd_v.external_network_interface }}"
+            jump: ACCEPT
+          notify: os_ufw_rules_changed
 
         - name: "Install the factomd.conf template"
           template:
