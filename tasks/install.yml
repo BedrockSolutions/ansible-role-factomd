@@ -120,7 +120,7 @@
             chain: DOCKER-USER
             destination_port: "{{ item }}"
             in_interface: "{{ factomd_v.external_network_interface }}"
-            jump: ALLOW
+            jump: ACCEPT
             match: tcp
             protocol: tcp
             source: "{{ factomd_docker_config.swarm_manager_host }}"
@@ -136,7 +136,7 @@
             chain: DOCKER-USER
             destination_port: 8088
             in_interface: "{{ factomd_v.external_network_interface }}"
-            jump: ALLOW
+            jump: ACCEPT
             match: tcp
             protocol: tcp
             source: "{{ item }}"
