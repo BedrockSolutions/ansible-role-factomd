@@ -5,6 +5,12 @@
         schema:
           type: object
           properties:
+            api_allowed_networks:
+              type: array
+              items:
+                type: string
+                format: ipv4
+              default: []
             database_volume_device:
               type: string
             docker_build:
@@ -26,6 +32,7 @@
               type: boolean
               default: no
           required:
+            - api_allowed_networks
             - database_volume_device
             - external_network_interface
             - keys_volume_device
@@ -92,7 +99,7 @@
             to_port: 2376
           notify: os_ufw_rules_changed
 
-        - name: "Restrict factomd console, api, and portainer ssh to swarm manager"
+        - name: "Drop all console, api, and portainer ssh traffic"
           iptables:
             action: insert
             chain: DOCKER-USER
@@ -101,12 +108,40 @@
             jump: DROP
             match: tcp
             protocol: tcp
-            source: "! {{ factomd_docker_config.swarm_manager_host }}"
           notify: os_ufw_rules_changed
           loop:
-            - 8088
             - 8090
+            - 8088
             - 2222
+
+        - name: "Allow factomd console, api, and portainer ssh to swarm manager"
+          iptables:
+            action: insert
+            chain: DOCKER-USER
+            destination_port: "{{ item }}"
+            in_interface: "{{ factomd_v.external_network_interface }}"
+            jump: ALLOW
+            match: tcp
+            protocol: tcp
+            source: "{{ factomd_docker_config.swarm_manager_host }}"
+          notify: os_ufw_rules_changed
+          loop:
+            - 8090
+            - 8088
+            - 2222
+
+        - name: "Allow api traffic to allowed networks"
+          iptables:
+            action: insert
+            chain: DOCKER-USER
+            destination_port: 8088
+            in_interface: "{{ factomd_v.external_network_interface }}"
+            jump: ALLOW
+            match: tcp
+            protocol: tcp
+            source: "{{ item }}"
+          notify: os_ufw_rules_changed
+          loop: "{{ docker_v.api_allowed_networks }}"
 
         - name: "Install the factomd.conf template"
           template:
