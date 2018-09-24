@@ -112,6 +112,17 @@
             jump: DROP
           notify: os_ufw_rules_changed
 
+        - name: "Allow P2P traffic"
+          iptables:
+            action: insert
+            chain: DOCKER-USER
+            destination_port: 8108
+            in_interface: "{{ factomd_v.external_network_interface }}"
+            jump: RETURN
+            match: tcp
+            protocol: tcp
+          notify: os_ufw_rules_changed
+
         - name: "Allow factomd console, api, and portainer ssh to swarm manager"
           iptables:
             action: insert
