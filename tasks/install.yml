@@ -112,14 +112,28 @@
             ctstate:
               - ESTABLISHED
               - RELATED
-            in_interface: "{{ factomd_v.external_network_interface }}"
-            jump: ACCEPT
+            jump: RETURN
           notify: os_ufw_rules_changed
+
+        - name: "Allow connections originating from docker0 and docker_gwbridge"
+          iptables:
+            action: append
+            chain: DOCKER-USER
+            ctstate:
+              - NEW
+            in_interface: "{{ item }}"
+            jump: RETURN
+          notify: os_ufw_rules_changed
+          loop:
+            - docker0
+            - docker_gwbridge
 
         - name: "Allow P2P traffic"
           iptables:
             action: append
             chain: DOCKER-USER
+            ctstate:
+              - NEW
             destination_port: 8108
             in_interface: "{{ factomd_v.external_network_interface }}"
             jump: RETURN
@@ -131,6 +145,8 @@
           iptables:
             action: append
             chain: DOCKER-USER
+            ctstate:
+              - NEW
             destination_port: "{{ item }}"
             in_interface: "{{ factomd_v.external_network_interface }}"
             jump: RETURN
@@ -139,14 +155,16 @@
             source: "{{ factomd_docker_config.swarm_manager_host }}"
           notify: os_ufw_rules_changed
           loop:
-            - 8090
-            - 8088
             - 2222
+            - 8088
+            - 8090
 
         - name: "Allow API traffic to allowed networks"
           iptables:
             action: append
             chain: DOCKER-USER
+            ctstate:
+              - NEW
             destination_port: 8088
             in_interface: "{{ factomd_v.external_network_interface }}"
             jump: RETURN
@@ -158,8 +176,8 @@
 
         - name: "Log all non-matching packets on DOCKER-USER"
           iptables:
-            chain: DOCKER-USER
             action: append
+            chain: DOCKER-USER
             jump: LOG
             limit: 1/s
             log_prefix: DOCKER-USER
