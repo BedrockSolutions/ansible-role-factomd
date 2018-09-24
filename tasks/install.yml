@@ -174,14 +174,14 @@
           notify: os_ufw_rules_changed
           loop: "{{ factomd_v.api_allowed_networks }}"
 
-#        - name: "Log all non-matching packets on DOCKER-USER"
-#          iptables:
-#            action: append
-#            chain: DOCKER-USER
-#            jump: LOG
-#            limit: 1/s
-#            log_prefix: DOCKER-USER
-#          notify: os_ufw_rules_changed
+        - name: "Log all non-matching packets on DOCKER-USER"
+          iptables:
+            action: append
+            chain: DOCKER-USER
+            jump: LOG
+            limit: 2/m
+            log_prefix: DOCKER-USER
+          notify: os_ufw_rules_changed
 
         - name: "Drop all non-matching packets on DOCKER-USER"
           iptables:
