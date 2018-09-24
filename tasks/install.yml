@@ -105,16 +105,20 @@
             flush: yes
           notify: os_ufw_rules_changed
 
-        - name: "Drop all non-matching packets on DOCKER-USER"
+        - name: "Allow established and related traffic on DOCKER-USER"
           iptables:
-            chain: DOCKER-USER
             action: append
-            jump: DROP
+            chain: DOCKER-USER
+            ctstate:
+              - ESTABLISHED
+              - RELATED
+            in_interface: "{{ factomd_v.external_network_interface }}"
+            jump: ACCEPT
           notify: os_ufw_rules_changed
 
         - name: "Allow P2P traffic"
           iptables:
-            action: insert
+            action: append
             chain: DOCKER-USER
             destination_port: 8108
             in_interface: "{{ factomd_v.external_network_interface }}"
@@ -125,7 +129,7 @@
 
         - name: "Allow factomd console, api, and portainer ssh to swarm manager"
           iptables:
-            action: insert
+            action: append
             chain: DOCKER-USER
             destination_port: "{{ item }}"
             in_interface: "{{ factomd_v.external_network_interface }}"
@@ -141,7 +145,7 @@
 
         - name: "Allow API traffic to allowed networks"
           iptables:
-            action: insert
+            action: append
             chain: DOCKER-USER
             destination_port: 8088
             in_interface: "{{ factomd_v.external_network_interface }}"
@@ -152,15 +156,11 @@
           notify: os_ufw_rules_changed
           loop: "{{ factomd_v.api_allowed_networks }}"
 
-        - name: "Allow established and related traffic on DOCKER-USER"
+        - name: "Drop all non-matching packets on DOCKER-USER"
           iptables:
-            action: insert
             chain: DOCKER-USER
-            ctstate:
-              - ESTABLISHED
-              - RELATED
-            in_interface: "{{ factomd_v.external_network_interface }}"
-            jump: ACCEPT
+            action: append
+            jump: DROP
           notify: os_ufw_rules_changed
 
         - name: "Install the factomd.conf template"
