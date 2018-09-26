@@ -28,6 +28,12 @@
               enum:
                 - mainnet
                 - testnet
+            prometheus_allowed_networks:
+              type: array
+              items:
+                type: string
+                format: ipv4
+              default: []
             stackdriver_enabled:
               type: boolean
               default: no
@@ -37,6 +43,7 @@
             - external_network_interface
             - keys_volume_device
             - network
+            - prometheus_allowed_networks
             - stackdriver_enabled
         instance: "{{ factomd }}"
       register: factomd_validated
@@ -173,6 +180,21 @@
             source: "{{ item }}"
           notify: os_ufw_rules_changed
           loop: "{{ factomd_v.api_allowed_networks }}"
+
+        - name: "Allow Prometheus traffic to allowed networks"
+          iptables:
+            action: append
+            chain: DOCKER-USER
+            ctstate:
+              - NEW
+            destination_port: 9876
+            in_interface: "{{ factomd_v.external_network_interface }}"
+            jump: RETURN
+            match: tcp
+            protocol: tcp
+            source: "{{ item }}"
+          notify: os_ufw_rules_changed
+          loop: "{{ factomd_v.prometheus_allowed_networks }}"
 
         - name: "Log all non-matching packets on DOCKER-USER"
           iptables:
