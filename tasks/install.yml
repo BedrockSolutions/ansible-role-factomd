@@ -94,7 +94,7 @@
       vars:
         docker:
           command: swarm_worker_node
-          manager_host: "{{ factomd_docker_config.swarm_manager_host[0] }}" # todo: remove when IP address is fixed
+          manager_host: "{{ factomd_docker_config.swarm_manager_hosts[0] }}" # todo: remove when IP address is fixed
           token: "{{ factomd_docker_config.swarm_token }}"
 
     - block:
