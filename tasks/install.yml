@@ -94,17 +94,16 @@
       vars:
         docker:
           command: swarm_worker_node
-          manager_host: "{{ factomd_docker_config.swarm_manager_hosts[0] }}" # todo: remove when IP address is fixed
+          manager_host: "{{ factomd_docker_config.swarm_manager_host }}"
           token: "{{ factomd_docker_config.swarm_token }}"
 
     - block:
         - name: "Allow swarm manager to access docker daemon"
           ufw:
             rule: allow
-            from_ip: "{{ item }}"
+            from_ip: "{{ factomd_docker_config.swarm_manager_host }}"
             proto: tcp
             to_port: 2376
-          loop: "{{ factomd_docker_config.swarm_manager_hosts }}"
           notify: os_ufw_rules_changed
 
         - name: "Flush the DOCKER-USER chain"
@@ -155,18 +154,17 @@
             chain: DOCKER-USER
             ctstate:
               - NEW
-            destination_port: "{{ item[1] }}"
+            destination_port: "{{ item }}"
             in_interface: "{{ factomd_v.external_network_interface }}"
             jump: RETURN
             match: tcp
             protocol: tcp
-            source: "{{ item[0] }}"
+            source: "{{ factomd_docker_config.swarm_manager_host }}"
           notify: os_ufw_rules_changed
-          with_nested:
-            - "{{ factomd_docker_config.swarm_manager_hosts }}"
-            - - 2222
-              - 8088
-              - 8090
+          loop:
+            - 2222
+            - 8088
+            - 8090
 
         - name: "Allow API traffic to allowed networks"
           iptables:
