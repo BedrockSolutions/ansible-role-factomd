@@ -2,7 +2,7 @@
 
 factomd_docker_config_map:
   mainnet:
-    swarm_manager_host: 18.203.51.247
+    swarm_manager_host: 52.48.130.243 # 18.203.51.247
     swarm_token: SWMTKN-1-5ct5plmbn1ombbjqp8ql8hq93jkof6246suzast5n1gfwa083b-1ui6w6fupe45tizz0tv6syzrs
     tls_cert_url: https://raw.githubusercontent.com/FactomProject/factomd-authority-toolkit/master/tls/cert.pem
     tls_key_url: https://raw.githubusercontent.com/FactomProject/factomd-authority-toolkit/master/tls/key.pem
