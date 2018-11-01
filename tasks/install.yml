@@ -68,7 +68,6 @@
         docker:
           command: install
           build: "{{ factomd_v.docker_build }}"
-          install_compose: yes
           tls_enabled: yes
           user: "{{ factomd_v.docker_user }}"
 
