@@ -7,12 +7,9 @@
         additionalProperties:
           - command
         properties:
-          machine_name:
-            type: string
           zone:
             type: string
         required:
-          - machine_name
           - zone
       instance: "{{ factomd }}"
     register: factomd_validated
@@ -25,9 +22,9 @@
     vars:
       gcp:
         command: disk_image
-        disk_name: "{{ factomd_v.machine_name }}-factom-database"
+        disk_name: "{{ inventory_hostname }}-factom-database"
         family: factom-database
-        name: "{{ factomd_v.machine_name }}-factom-database"
+        name: "{{ inventory_hostname }}-factom-database"
         zone: "{{ factomd_v.zone }}"
 
 #    - name: "Create a snapshot of the factom_database volume"
