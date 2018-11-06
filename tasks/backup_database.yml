@@ -9,10 +9,8 @@
         properties:
           machine_name:
             type: string
-            default: "{{ inventory_hostname }}"
           zone:
             type: string
-            default: "{{ hostvars.zone }}"
         required:
           - machine_name
           - zone
