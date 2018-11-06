@@ -1,12 +1,44 @@
 ---
 
 - block:
-    - name: "Create a snapshot of the factom_database volume"
-      command: >
-        gcloud compute disks snapshot
-        {{ inventory_hostname }}-factom-database
-        --snapshot-names {{ inventory_hostname }}-factom-database-{{ ansible_date_time.epoch }}
-        --zone {{ zone }}
-      delegate_to: localhost
+  - validate:
+      schema:
+        type: object
+        additionalProperties:
+          - command
+        properties:
+          machine_name:
+            type: string
+            default: "{{ inventory_hostname }}"
+          zone:
+            type: string
+            default: "{{ hostvars.zone }}"
+        required:
+          - machine_name
+          - zone
+      instance: "{{ factomd }}"
+    register: factomd_validated
+
+  - set_fact:
+      factomd_v: "{{ factomd_validated.result }}"
+
+  - import_role:
+      name: bedrock.gcp
+    vars:
+      gcp:
+        command: disk_image
+        disk_name: "{{ factomd_v.machine_name }}-factom-database"
+        family: factom-database
+        name: "{{ factomd_v.machine_name }}-factom-database"
+        zone: "{{ factomd_v.zone }}"
+
+#    - name: "Create a snapshot of the factom_database volume"
+#      command: >
+#        gcloud compute disks snapshot
+#        {{ inventory_hostname }}-factom-database
+#        --snapshot-names {{ inventory_hostname }}-factom-database-{{ ansible_date_time.epoch }}
+#        --zone {{ zone }}
+#      delegate_to: localhost
   tags:
     - factomd_backup_database
+
