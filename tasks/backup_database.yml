@@ -19,24 +19,27 @@
   - set_fact:
       factomd_v: "{{ factomd_validated.result }}"
 
+#  - import_role:
+#      name: bedrock.gcp
+#    vars:
+#      gcp:
+#        command: disk_image
+#        disk_name: "{{ inventory_hostname }}-factom-database"
+#        family: factom-database
+#        name: "{{ inventory_hostname }}-factom-database"
+#        project: "{{ factomd_v.project }}"
+#        zone: "{{ factomd_v.zone }}"
+
   - import_role:
       name: bedrock.gcp
     vars:
       gcp:
-        command: disk_image
+        command: disk_snapshot
         disk_name: "{{ inventory_hostname }}-factom-database"
-        family: factom-database
         name: "{{ inventory_hostname }}-factom-database"
         project: "{{ factomd_v.project }}"
         zone: "{{ factomd_v.zone }}"
 
-#    - name: "Create a snapshot of the factom_database volume"
-#      command: >
-#        gcloud compute disks snapshot
-#        {{ inventory_hostname }}-factom-database
-#        --snapshot-names {{ inventory_hostname }}-factom-database-{{ ansible_date_time.epoch }}
-#        --zone {{ zone }}
-#      delegate_to: localhost
   tags:
     - factomd_backup_database
 
