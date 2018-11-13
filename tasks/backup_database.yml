@@ -7,6 +7,8 @@
         additionalProperties:
           - command
         properties:
+          project:
+            type: string
           zone:
             type: string
         required:
@@ -25,6 +27,7 @@
         disk_name: "{{ inventory_hostname }}-factom-database"
         family: factom-database
         name: "{{ inventory_hostname }}-factom-database"
+        project: "{{ factomd_v.project }}"
         zone: "{{ factomd_v.zone }}"
 
 #    - name: "Create a snapshot of the factom_database volume"
