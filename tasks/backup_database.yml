@@ -17,6 +17,8 @@
           zone:
             type: string
         required:
+          - project
+          - type
           - zone
       instance: "{{ factomd }}"
     register: factomd_validated
