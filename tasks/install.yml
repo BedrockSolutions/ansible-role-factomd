@@ -66,7 +66,7 @@
         name: bedrock.docker
       vars:
         docker:
-          command: install2
+          command: install
           build: "{{ factomd_v.docker_build }}"
           tls_enabled: yes
           user: "{{ factomd_v.docker_user }}"
