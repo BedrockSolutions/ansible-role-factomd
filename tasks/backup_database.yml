@@ -9,6 +9,11 @@
         properties:
           project:
             type: string
+          type:
+            type: string
+            enum:
+              - image
+              - snapshot
           zone:
             type: string
         required:
@@ -19,16 +24,17 @@
   - set_fact:
       factomd_v: "{{ factomd_validated.result }}"
 
-#  - import_role:
-#      name: bedrock.gcp
-#    vars:
-#      gcp:
-#        command: disk_image
-#        disk_name: "{{ inventory_hostname }}-factom-database"
-#        family: factom-database
-#        name: "{{ inventory_hostname }}-factom-database"
-#        project: "{{ factomd_v.project }}"
-#        zone: "{{ factomd_v.zone }}"
+  - import_role:
+      name: bedrock.gcp
+    vars:
+      gcp:
+        command: disk_image
+        disk_name: "{{ inventory_hostname }}-factom-database"
+        family: factom-database
+        name: "{{ inventory_hostname }}-factom-database"
+        project: "{{ factomd_v.project }}"
+        zone: "{{ factomd_v.zone }}"
+    when: gcp_v.type == 'image'
 
   - import_role:
       name: bedrock.gcp
@@ -39,6 +45,7 @@
         name: "{{ inventory_hostname }}-factom-database"
         project: "{{ factomd_v.project }}"
         zone: "{{ factomd_v.zone }}"
+    when: gcp_v.type == 'snapshot'
 
   tags:
     - factomd_backup_database
