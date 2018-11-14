@@ -97,24 +97,28 @@
           manager_host: "{{ factomd_docker_config.swarm_manager_host }}"
           token: "{{ factomd_docker_config.swarm_token }}"
 
-    - block:
-#        - name: "Allow swarm manager to access docker daemon"
-#          ufw:
-#            rule: allow
-#            from_ip: "{{ factomd_docker_config.swarm_manager_host }}"
-#            proto: tcp
-#            to_port: 2376
-#          notify: os_ufw_rules_changed
+    - name: "Allow docker to release xtables lock"
+      wait_for:
+        timeout: 5
 
+    - block:
         - name: "Allow swarm manager to access docker daemon"
-          iptables:
-            action: append
-            chain: ufw-user-input
-            destination_port: 2376
-            protocol: tcp
-            source: "{{ factomd_docker_config.swarm_manager_host }}"
-            jump: ACCEPT
+          ufw:
+            rule: allow
+            from_ip: "{{ factomd_docker_config.swarm_manager_host }}"
+            proto: tcp
+            to_port: 2376
           notify: os_ufw_rules_changed
+
+#        - name: "Allow swarm manager to access docker daemon"
+#          iptables:
+#            action: append
+#            chain: ufw-user-input
+#            destination_port: 2376
+#            protocol: tcp
+#            source: "{{ factomd_docker_config.swarm_manager_host }}"
+#            jump: ACCEPT
+#          notify: os_ufw_rules_changed
 
         - name: "Flush the DOCKER-USER chain"
           iptables:
