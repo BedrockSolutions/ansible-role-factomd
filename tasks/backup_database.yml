@@ -36,7 +36,7 @@
         name: "{{ inventory_hostname }}-factom-database"
         project: "{{ factomd_v.project }}"
         zone: "{{ factomd_v.zone }}"
-    when: gcp_v.type == 'image'
+    when: factomd_v.type == 'image'
 
   - import_role:
       name: bedrock.gcp
@@ -47,7 +47,7 @@
         name: "{{ inventory_hostname }}-factom-database"
         project: "{{ factomd_v.project }}"
         zone: "{{ factomd_v.zone }}"
-    when: gcp_v.type == 'snapshot'
+    when: factomd_v.type == 'snapshot'
 
   tags:
     - factomd_backup_database
