@@ -97,9 +97,9 @@
           manager_host: "{{ factomd_docker_config.swarm_manager_host }}"
           token: "{{ factomd_docker_config.swarm_token }}"
 
-    - name: "Allow docker to release xtables lock"
-      wait_for:
-        timeout: 5
+#    - name: "Allow docker to release xtables lock"
+#      wait_for:
+#        timeout: 5
 
     - block:
         - name: "Allow swarm manager to access docker daemon"
@@ -108,7 +108,11 @@
             from_ip: "{{ factomd_docker_config.swarm_manager_host }}"
             proto: tcp
             to_port: 2376
+          delay: 3
           notify: os_ufw_rules_changed
+          register: factomd_ufw_swarm_result
+          retries: 5
+          until: factomd_ufw_swarm_result | succeeded
 
 #        - name: "Allow swarm manager to access docker daemon"
 #          iptables:
