@@ -17,6 +17,14 @@ dependencies:
         command: dependency
     version: master
 
+  - name: bedrock.gcp
+    scm: git
+    src: https://github.com/BedrockSolutions/ansible-role-gcp.git
+    vars:
+      gcp:
+        command: dependency
+    version: master
+
   - name: bedrock.os
     scm: git
     src: https://github.com/BedrockSolutions/ansible-role-os.git
