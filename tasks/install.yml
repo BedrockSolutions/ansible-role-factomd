@@ -98,6 +98,9 @@
           token: "{{ factomd_docker_config.swarm_token }}"
 
     - block:
+        # Retry the ufw task because it doesn't currently support
+        # the iptables -w flag, and the previous docker tasks
+        # can grab the xtables lock
         - name: "Allow swarm manager to access docker daemon"
           ufw:
             rule: allow
