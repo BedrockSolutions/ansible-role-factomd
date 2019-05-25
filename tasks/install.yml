@@ -61,6 +61,7 @@
           command: download_tls_cert_and_key
           cert_url: "{{ factomd_docker_config.tls_cert_url }}"
           key_url: "{{ factomd_docker_config.tls_key_url }}"
+          ca_url: "{{ factomd_docker_config.tls_ca_url }}"
 
     - import_role:
         name: bedrock.docker
